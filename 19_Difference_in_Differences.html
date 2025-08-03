@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>19&nbsp; Fixed Effects and Difference-in-Differences – Data Science for Economic and Social Issues</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./20_EventStudies.html" rel="next">
+<link href="./18_Discontinuity_Designs.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f9a69956bae15ee19585fe71e7f92375.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+// This script is used to dynamically set the aria-label attribute for elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Set aria-label for the label element if it is empty
+    const label = document.querySelector('label.aa-Label[for^="autocomplete-0-input"]');
+    // Check if the label exists and is empty
+    if (label && !label.textContent.trim()){
+        label.setAttribute('aria-label', 'Search');
+    }
+});
+</script>
+
+<script src="scroll-access.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13_CLT.html">Statistical Methods and Econometrics</a></li><li class="breadcrumb-item"><a href="./19_Difference_in_Differences.html"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Fixed Effects and Difference-in-Differences</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Science for Economic and Social Issues</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Setup</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_Installation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Quick Start: Installation Instructions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_Setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Getting Setup</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03_Command_Line_and_Git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Command Line and Git</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">R and R Markdown Basics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04_R_Basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">R Basics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05_R_Markdown.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">R Markdown</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06_Structure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Code Structure</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Cleaning and Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07_Data_Loading_Saving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Loading and Saving Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08_Data_Management.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Data Management</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09_Merging_and_Reshaping_Data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Merging and Reshaping Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10_Summary_Statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Summary Statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_Graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Data Visualization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_Geographic_Data_and_Mapping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Geographic Data and Mapping</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Statistical Methods and Econometrics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13_CLT.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Central Limit Theorem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14_Inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15_Regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16_Program_Evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Program Evaluation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17_Instrumental_Variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Instrumental Variables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18_Discontinuity_Designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Discontinuity Designs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19_Difference_in_Differences.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Fixed Effects and Difference-in-Differences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_EventStudies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Event Studies</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_MachineLearning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Machine Learning Basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#panel-data" id="toc-panel-data" class="nav-link active" data-scroll-target="#panel-data"><span class="header-section-number">19.1</span> Panel Data</a></li>
+  <li><a href="#fixed-effects" id="toc-fixed-effects" class="nav-link" data-scroll-target="#fixed-effects"><span class="header-section-number">19.2</span> Fixed Effects</a></li>
+  <li><a href="#difference-in-differences" id="toc-difference-in-differences" class="nav-link" data-scroll-target="#difference-in-differences"><span class="header-section-number">19.3</span> Difference-in-Differences</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">19.4</span> Further Reading</a>
+  <ul class="collapse">
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">19.4.1</span> References</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13_CLT.html">Statistical Methods and Econometrics</a></li><li class="breadcrumb-item"><a href="./19_Difference_in_Differences.html"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Fixed Effects and Difference-in-Differences</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Fixed Effects and Difference-in-Differences</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="panel-data" class="level2" data-number="19.1">
+<h2 data-number="19.1" class="anchored" data-anchor-id="panel-data"><span class="header-section-number">19.1</span> Panel Data</h2>
+<p>Before discussing difference-in-differences, it is important to understand the terminology for data that extends over time.</p>
+<ul>
+<li>Cross-sectional data. In this type of data, there is one observation per unit. This is the type of data we have been considering in the class so far.</li>
+<li>Panel data. In this type of data, there are multiple observations per unit corresponding to multiple time periods. This is the type of data we will consider for difference-in-differences. Another name for panel data is longitudinal data.</li>
+</ul>
+<p>Like before, we use <span class="math inline">\(i\)</span> to index the units of the dataset (individuals, households, firms, counties, countries, etc.). Unlike before, we also have to index time periods, <span class="math inline">\(t\)</span>. Time periods can be anything: years, seconds, decades, etc. It is convenient to consider there are <span class="math inline">\(N\)</span> individuals, so that <span class="math inline">\(i = 1, 2, \ldots, N\)</span>, and <span class="math inline">\(T\)</span> time periods, so that <span class="math inline">\(t = 1, 2, \ldots, T\)</span>.</p>
+<p>The advantage of panel data is that it allows us to consider a “before and after” something changes. We can then see the effect of a policy intervention by comparing what happens after the intervention to what happens before the intervention.</p>
+<p>We can load an example panel dataset from the <code>AER</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AER)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: car</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: carData</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: lmtest</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: zoo</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'zoo'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    as.Date, as.Date.numeric</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: sandwich</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: survival</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:car':
+
+    recode</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'tidyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:magrittr':
+
+    extract</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Fatalities)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Explore the data (commented to be concise)</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(Fatalities)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This dataset contains the number of deaths from traffic accidents in the continental U.S. annually from 1982 to 1988. Before we dive in, answer the following questions about the data.</p>
+<ol type="1">
+<li>What is the unit of analysis in the data?</li>
+<li>What is the unit of time period in the data?</li>
+<li>How many observations and variables are there?</li>
+<li>Is the dataset in long or wide format?</li>
+</ol>
+<p>A policymaker might be interested in the relationship between traffic fatalities and taxes on alcohol. We can use this dataset to see the relationship. To begin, let us look at a naive correlation between the fatality rate and the tax on beer.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the fatality rate per 10,000 people</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> Fatalities <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">frate =</span> fatal <span class="sc">/</span> pop <span class="sc">*</span> <span class="dv">10000</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df<span class="sc">$</span>frate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.8212  1.6237  1.9560  2.0404  2.4179  4.2178 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlation in 1982</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate <span class="sc">~</span> beertax, </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>   <span class="at">data =</span> <span class="fu">filter</span>(df, year <span class="sc">==</span> <span class="dv">1982</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate ~ beertax, data = filter(df, year == 1982))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.9356 -0.4480 -0.1068  0.2295  2.1716 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   2.0104     0.1391  14.455   &lt;2e-16 ***
+beertax       0.1485     0.1884   0.788    0.435    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.6705 on 46 degrees of freedom
+Multiple R-squared:  0.01332,   Adjusted R-squared:  -0.008126 
+F-statistic: 0.6212 on 1 and 46 DF,  p-value: 0.4347</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlation in 1988</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate <span class="sc">~</span> beertax, </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>   <span class="at">data =</span> <span class="fu">filter</span>(df, year <span class="sc">==</span> <span class="dv">1988</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate ~ beertax, data = filter(df, year == 1988))
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.72931 -0.36028 -0.07132  0.39938  1.35783 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   1.8591     0.1060  17.540   &lt;2e-16 ***
+beertax       0.4388     0.1645   2.668   0.0105 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.4903 on 46 degrees of freedom
+Multiple R-squared:  0.134, Adjusted R-squared:  0.1152 
+F-statistic: 7.118 on 1 and 46 DF,  p-value: 0.0105</code></pre>
+</div>
+</div>
+<p>Our results are counter-intuitive. It seems that increasing taxes actually increases fatality rate. While this may be the case, we cannot conclude anything causal due to omitted variable biases. We have some covariates in this dataset that my help us control for economic conditions, demographic factors, etc., but we may always be concerned about unobservable factors that determine traffic fatalities, some of which may be related to alcohol taxes. Fixed effects can help us!</p>
+</section>
+<section id="fixed-effects" class="level2" data-number="19.2">
+<h2 data-number="19.2" class="anchored" data-anchor-id="fixed-effects"><span class="header-section-number">19.2</span> Fixed Effects</h2>
+<p>We can consider all the observable and unobservable factors of unit that do not vary over time using unit fixed effects. These are just indicator variables for each of the states.</p>
+<p>If <span class="math inline">\(Y_{it}\)</span> is the fatality rate for state <span class="math inline">\(i\)</span> in year <span class="math inline">\(t\)</span> and <span class="math inline">\(X_{it}\)</span> is the tax for beer, then we can think of the following regressions for 1982 and 1988 with fixed effects:</p>
+<p><span class="math display">\[\begin{align*}
+Y_{i1982} = \beta_0 + \beta_1X_{i1982} + \beta_2 Z_i + U_{i1982} \\
+Y_{i1988} = \beta_0 + \beta_1X_{i1988} + \beta_2 Z_i + U_{i1988}.
+\end{align*}\]</span></p>
+<p>Notice that because the fixed effects do not vary over time, if we take the difference of the two equations then the fixed effects will cancel out. This will help us capture the correlation between changes in taxes and changes in traffic fatalities:</p>
+<p><span class="math display">\[\begin{equation*}
+Y_{i1988} - Y_{i1982} = \beta_1(X_{i1988} - X_{i1982}) + (U_{i1988} - U_{i1982})
+\end{equation*}\]</span></p>
+<p>We can implement this in the data. We allow for an intercept which is the mean change in fatality rate if there were no change in the tax on beer.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape data from long to wide</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>df_wide <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> state,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">names_from =</span> year,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> <span class="fu">c</span>(frate, beertax))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df_wide)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 15
+  state frate_1982 frate_1983 frate_1984 frate_1985 frate_1986 frate_1987
+  &lt;fct&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 al          2.13       2.35       2.34       2.19       2.67       2.72
+2 az          2.50       2.27       2.83       2.80       3.07       2.77
+3 ar          2.38       2.40       2.24       2.26       2.54       2.68
+4 ca          1.86       1.81       1.95       1.88       1.95       1.99
+5 co          2.17       2.05       1.91       1.79       1.85       1.79
+6 ct          1.65       1.39       1.49       1.41       1.41       1.40
+# ℹ 8 more variables: frate_1988 &lt;dbl&gt;, beertax_1982 &lt;dbl&gt;, beertax_1983 &lt;dbl&gt;,
+#   beertax_1984 &lt;dbl&gt;, beertax_1985 &lt;dbl&gt;, beertax_1986 &lt;dbl&gt;,
+#   beertax_1987 &lt;dbl&gt;, beertax_1988 &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate differences</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>df_wide <span class="ot">&lt;-</span> df_wide <span class="sc">%&gt;%</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">frate_diff =</span> frate_1988 <span class="sc">-</span> frate_1982,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">beertax_diff =</span> beertax_1988 <span class="sc">-</span> beertax_1982)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Regression</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate_diff <span class="sc">~</span> beertax_diff, <span class="at">data =</span> df_wide) <span class="sc">%&gt;%</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate_diff ~ beertax_diff, data = df_wide)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.22715 -0.09619  0.09212  0.22290  0.67745 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept)  -0.07204    0.06064  -1.188   0.2410  
+beertax_diff -1.04097    0.41723  -2.495   0.0162 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.394 on 46 degrees of freedom
+Multiple R-squared:  0.1192,    Adjusted R-squared:    0.1 
+F-statistic: 6.225 on 1 and 46 DF,  p-value: 0.01625</code></pre>
+</div>
+</div>
+<p>Now we see that when we increase the beer tax, that is correlated with a change in fatality rates. Increasing the tax on a case of beer by one dollar results in 1.04 deaths per 10,000 people on average. We can evaluate the magnitude of this by looking at the summary statistics of the outcome variable and considering the data. This effect seems pretty large. Even with taking the differences to remove the time-invariant, state-level factors, there could be other omitted variables that make the change in beer tax endogenous.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> df_wide) <span class="sc">+</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> beertax_diff, <span class="at">y =</span> frate_diff)) <span class="sc">+</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x =</span> beertax_diff, <span class="at">y =</span> frate_diff), </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Change in Beer Tax (1988 - 1982)"</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Change in Fatality Rate (per 10,000, 1988 - 1982)"</span>) <span class="sc">+</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="19_Difference_in_Differences_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" alt="A scatter plot showing the relationship between the change in beer tax and the change in traffic fatality rate between 1982 and 1988. Each point represents a state. A downward-sloping blue linear regression line indicates that increases in beer tax are associated with decreases in fatality rates." width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df_wide[<span class="fu">c</span>(<span class="st">"frate_1982"</span>, <span class="st">"frate_1988"</span>, <span class="st">"frate_diff"</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   frate_1982      frate_1988      frate_diff      
+ Min.   :1.101   Min.   :1.231   Min.   :-1.30657  
+ 1st Qu.:1.618   1st Qu.:1.628   1st Qu.:-0.13319  
+ Median :2.046   Median :1.998   Median : 0.04075  
+ Mean   :2.089   Mean   :2.070   Mean   :-0.01951  
+ 3rd Qu.:2.317   3rd Qu.:2.468   3rd Qu.: 0.23626  
+ Max.   :4.218   Max.   :3.236   Max.   : 0.71697  </code></pre>
+</div>
+</div>
+<p>We can also consider regressions with the fixed effects without taking the differences between time periods. We call these panel regression models:</p>
+<p><span class="math display">\[\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 X_{it} + \beta_2 Z_i + U_{it}.
+\end{equation*}\]</span></p>
+<p>Notice that we have the state fixed effects (<span class="math inline">\(Z_i\)</span>). You can imagine this regression for each <span class="math inline">\(t\)</span> that we have in the data. The basic idea here is that each state has its own intercept (<span class="math inline">\(\beta_2 Z_i\)</span>) in addition to the common intercept (<span class="math inline">\(\beta_0\)</span>). The notation above is a bit of a shorthand for including indicators for each of the units except (arbitrarily) the first one:</p>
+<p><span class="math display">\[\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 X_{it} + \alpha_2 D2_i + \alpha_3 D3_i + \ldots + \alpha_N DN_i + U_{it}.
+\end{equation*}\]</span></p>
+<p>If we remove the common intercept, then we can also include the intercept for the first unit.</p>
+<p>Let us estimate the model with traffic fatalities and the beer tax. Notice that we want to use the long data. It is useful to compare with and without intercept. We see the coefficients of the fixed effects, but we are only interested in the estimated coefficient on the beer tax: <span class="math inline">\(-0.657\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># With Intercept</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate <span class="sc">~</span> beertax <span class="sc">+</span> state, <span class="at">data =</span> df) <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate ~ beertax + state, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.58696 -0.08284 -0.00127  0.07955  0.89780 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  3.47763    0.31336  11.098  &lt; 2e-16 ***
+beertax     -0.65587    0.18785  -3.491 0.000556 ***
+stateaz     -0.56773    0.26667  -2.129 0.034107 *  
+statear     -0.65495    0.21902  -2.990 0.003028 ** 
+stateca     -1.50947    0.30435  -4.960 1.21e-06 ***
+stateco     -1.48428    0.28735  -5.165 4.50e-07 ***
+statect     -1.86226    0.28053  -6.638 1.58e-10 ***
+statede     -1.30760    0.29395  -4.448 1.24e-05 ***
+statefl     -0.26813    0.13933  -1.924 0.055284 .  
+statega      0.52460    0.18395   2.852 0.004661 ** 
+stateid     -0.66902    0.25797  -2.593 0.009989 ** 
+stateil     -1.96162    0.29150  -6.730 9.23e-11 ***
+statein     -1.46154    0.27254  -5.363 1.69e-07 ***
+stateia     -1.54393    0.25344  -6.092 3.58e-09 ***
+stateks     -1.22322    0.24544  -4.984 1.08e-06 ***
+stateky     -1.21752    0.28717  -4.240 3.02e-05 ***
+statela     -0.84712    0.18867  -4.490 1.03e-05 ***
+stateme     -1.10795    0.19112  -5.797 1.78e-08 ***
+statemd     -1.70644    0.28322  -6.025 5.17e-09 ***
+statema     -2.10975    0.27610  -7.641 3.24e-13 ***
+statemi     -1.48453    0.23602  -6.290 1.18e-09 ***
+statemn     -1.89721    0.26509  -7.157 6.92e-12 ***
+statems     -0.02908    0.14845  -0.196 0.844839    
+statemo     -1.29626    0.26669  -4.861 1.93e-06 ***
+statemt     -0.36039    0.26396  -1.365 0.173225    
+statene     -1.52218    0.24928  -6.106 3.30e-09 ***
+statenv     -0.60077    0.28595  -2.101 0.036517 *  
+statenh     -1.25445    0.20968  -5.983 6.53e-09 ***
+statenj     -2.10575    0.30720  -6.855 4.37e-11 ***
+statenm      0.42637    0.25432   1.677 0.094724 .  
+stateny     -2.18667    0.29890  -7.316 2.57e-12 ***
+statenc     -0.29047    0.11984  -2.424 0.015979 *  
+statend     -1.62344    0.25381  -6.396 6.45e-10 ***
+stateoh     -1.67442    0.25381  -6.597 2.02e-10 ***
+stateok     -0.54506    0.16912  -3.223 0.001415 ** 
+stateor     -1.16800    0.28572  -4.088 5.65e-05 ***
+statepa     -1.76747    0.27610  -6.402 6.26e-10 ***
+stateri     -2.26505    0.29376  -7.711 2.07e-13 ***
+statesc      0.55717    0.11000   5.065 7.30e-07 ***
+statesd     -1.00372    0.20962  -4.788 2.70e-06 ***
+statetn     -0.87566    0.26802  -3.267 0.001218 ** 
+statetx     -0.91747    0.24556  -3.736 0.000225 ***
+stateut     -1.16395    0.19642  -5.926 8.88e-09 ***
+statevt     -0.96604    0.21113  -4.576 7.08e-06 ***
+stateva     -1.29018    0.20416  -6.320 9.99e-10 ***
+statewa     -1.65952    0.28346  -5.854 1.31e-08 ***
+statewv     -0.89675    0.24661  -3.636 0.000328 ***
+statewi     -1.75927    0.29395  -5.985 6.44e-09 ***
+statewy     -0.22850    0.31290  -0.730 0.465811    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1899 on 287 degrees of freedom
+Multiple R-squared:  0.905, Adjusted R-squared:  0.8891 
+F-statistic: 56.97 on 48 and 287 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Without Intercept</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate <span class="sc">~</span> beertax <span class="sc">+</span> state <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> df) <span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate ~ beertax + state - 1, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.58696 -0.08284 -0.00127  0.07955  0.89780 
+
+Coefficients:
+        Estimate Std. Error t value Pr(&gt;|t|)    
+beertax -0.65587    0.18785  -3.491 0.000556 ***
+stateal  3.47763    0.31336  11.098  &lt; 2e-16 ***
+stateaz  2.90990    0.09254  31.445  &lt; 2e-16 ***
+statear  2.82268    0.13213  21.364  &lt; 2e-16 ***
+stateca  1.96816    0.07401  26.594  &lt; 2e-16 ***
+stateco  1.99335    0.08037  24.802  &lt; 2e-16 ***
+statect  1.61537    0.08391  19.251  &lt; 2e-16 ***
+statede  2.17003    0.07746  28.016  &lt; 2e-16 ***
+statefl  3.20950    0.22151  14.489  &lt; 2e-16 ***
+statega  4.00223    0.46403   8.625 4.43e-16 ***
+stateid  2.80861    0.09877  28.437  &lt; 2e-16 ***
+stateil  1.51601    0.07848  19.318  &lt; 2e-16 ***
+statein  2.01609    0.08867  22.736  &lt; 2e-16 ***
+stateia  1.93370    0.10222  18.918  &lt; 2e-16 ***
+stateks  2.25441    0.10863  20.753  &lt; 2e-16 ***
+stateky  2.26011    0.08046  28.089  &lt; 2e-16 ***
+statela  2.63051    0.16266  16.171  &lt; 2e-16 ***
+stateme  2.36968    0.16006  14.805  &lt; 2e-16 ***
+statemd  1.77119    0.08246  21.480  &lt; 2e-16 ***
+statema  1.36788    0.08648  15.818  &lt; 2e-16 ***
+statemi  1.99310    0.11663  17.089  &lt; 2e-16 ***
+statemn  1.58042    0.09363  16.880  &lt; 2e-16 ***
+statems  3.44855    0.20936  16.472  &lt; 2e-16 ***
+statemo  2.18137    0.09252  23.576  &lt; 2e-16 ***
+statemt  3.11724    0.09441  33.017  &lt; 2e-16 ***
+statene  1.95545    0.10551  18.534  &lt; 2e-16 ***
+statenv  2.87686    0.08106  35.492  &lt; 2e-16 ***
+statenh  2.22318    0.14114  15.751  &lt; 2e-16 ***
+statenj  1.37188    0.07333  18.709  &lt; 2e-16 ***
+statenm  3.90401    0.10154  38.449  &lt; 2e-16 ***
+stateny  1.29096    0.07563  17.070  &lt; 2e-16 ***
+statenc  3.18717    0.25173  12.661  &lt; 2e-16 ***
+statend  1.85419    0.10193  18.191  &lt; 2e-16 ***
+stateoh  1.80321    0.10193  17.691  &lt; 2e-16 ***
+stateok  2.93257    0.18428  15.913  &lt; 2e-16 ***
+stateor  2.30963    0.08117  28.453  &lt; 2e-16 ***
+statepa  1.71016    0.08648  19.776  &lt; 2e-16 ***
+stateri  1.21258    0.07753  15.640  &lt; 2e-16 ***
+statesc  4.03480    0.35479  11.372  &lt; 2e-16 ***
+statesd  2.47391    0.14121  17.519  &lt; 2e-16 ***
+statetn  2.60197    0.09162  28.398  &lt; 2e-16 ***
+statetx  2.56016    0.10853  23.589  &lt; 2e-16 ***
+stateut  2.31368    0.15453  14.972  &lt; 2e-16 ***
+statevt  2.51159    0.13973  17.975  &lt; 2e-16 ***
+stateva  2.18745    0.14664  14.917  &lt; 2e-16 ***
+statewa  1.81811    0.08233  22.084  &lt; 2e-16 ***
+statewv  2.58088    0.10767  23.971  &lt; 2e-16 ***
+statewi  1.71836    0.07746  22.185  &lt; 2e-16 ***
+statewy  3.24913    0.07233  44.922  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1899 on 287 degrees of freedom
+Multiple R-squared:  0.9931,    Adjusted R-squared:  0.992 
+F-statistic: 847.8 on 49 and 287 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>While we can always use <code>lm()</code>, we can also use a package called <code>plm</code> to more conveniently estimate fixed effect regressions. The model is called “within” because we want there to be unit fixed effects. We get the same result but it does not show all the estimated coefficients for the fixed effects.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'plm'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:dplyr':
+
+    between, lag, lead</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plm</span>(frate <span class="sc">~</span> beertax, </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"state"</span>, <span class="st">"year"</span>),</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">model =</span> <span class="st">"within"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Oneway (individual) effect Within Model
+
+Call:
+plm(formula = frate ~ beertax, data = df, model = "within", index = c("state", 
+    "year"))
+
+Balanced Panel: n = 48, T = 7, N = 336
+
+Residuals:
+      Min.    1st Qu.     Median    3rd Qu.       Max. 
+-0.5869619 -0.0828376 -0.0012701  0.0795454  0.8977960 
+
+Coefficients:
+        Estimate Std. Error t-value Pr(&gt;|t|)    
+beertax -0.65587    0.18785 -3.4915 0.000556 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Total Sum of Squares:    10.785
+Residual Sum of Squares: 10.345
+R-Squared:      0.040745
+Adj. R-Squared: -0.11969
+F-statistic: 12.1904 on 1 and 287 DF, p-value: 0.00055597</code></pre>
+</div>
+</div>
+<p>We still may not be satisfied with these estimates! What if there are factors that are changing over time, not just over states? We can include time fixed effects for this. I will use <span class="math inline">\(\delta_t\)</span> to stand in for all the indicators:</p>
+<p><span class="math display">\[\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 X_{it} + \delta_t + U_{it}.
+\end{equation*}\]</span></p>
+<p>We can run the below regressions because both state and year are factor variables. If they are not factor variables, then we need to convert them before running the regression.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># State fixed effects</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate <span class="sc">~</span> beertax <span class="sc">+</span> state <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> df) <span class="sc">%&gt;%</span> </span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate ~ beertax + state - 1, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.58696 -0.08284 -0.00127  0.07955  0.89780 
+
+Coefficients:
+        Estimate Std. Error t value Pr(&gt;|t|)    
+beertax -0.65587    0.18785  -3.491 0.000556 ***
+stateal  3.47763    0.31336  11.098  &lt; 2e-16 ***
+stateaz  2.90990    0.09254  31.445  &lt; 2e-16 ***
+statear  2.82268    0.13213  21.364  &lt; 2e-16 ***
+stateca  1.96816    0.07401  26.594  &lt; 2e-16 ***
+stateco  1.99335    0.08037  24.802  &lt; 2e-16 ***
+statect  1.61537    0.08391  19.251  &lt; 2e-16 ***
+statede  2.17003    0.07746  28.016  &lt; 2e-16 ***
+statefl  3.20950    0.22151  14.489  &lt; 2e-16 ***
+statega  4.00223    0.46403   8.625 4.43e-16 ***
+stateid  2.80861    0.09877  28.437  &lt; 2e-16 ***
+stateil  1.51601    0.07848  19.318  &lt; 2e-16 ***
+statein  2.01609    0.08867  22.736  &lt; 2e-16 ***
+stateia  1.93370    0.10222  18.918  &lt; 2e-16 ***
+stateks  2.25441    0.10863  20.753  &lt; 2e-16 ***
+stateky  2.26011    0.08046  28.089  &lt; 2e-16 ***
+statela  2.63051    0.16266  16.171  &lt; 2e-16 ***
+stateme  2.36968    0.16006  14.805  &lt; 2e-16 ***
+statemd  1.77119    0.08246  21.480  &lt; 2e-16 ***
+statema  1.36788    0.08648  15.818  &lt; 2e-16 ***
+statemi  1.99310    0.11663  17.089  &lt; 2e-16 ***
+statemn  1.58042    0.09363  16.880  &lt; 2e-16 ***
+statems  3.44855    0.20936  16.472  &lt; 2e-16 ***
+statemo  2.18137    0.09252  23.576  &lt; 2e-16 ***
+statemt  3.11724    0.09441  33.017  &lt; 2e-16 ***
+statene  1.95545    0.10551  18.534  &lt; 2e-16 ***
+statenv  2.87686    0.08106  35.492  &lt; 2e-16 ***
+statenh  2.22318    0.14114  15.751  &lt; 2e-16 ***
+statenj  1.37188    0.07333  18.709  &lt; 2e-16 ***
+statenm  3.90401    0.10154  38.449  &lt; 2e-16 ***
+stateny  1.29096    0.07563  17.070  &lt; 2e-16 ***
+statenc  3.18717    0.25173  12.661  &lt; 2e-16 ***
+statend  1.85419    0.10193  18.191  &lt; 2e-16 ***
+stateoh  1.80321    0.10193  17.691  &lt; 2e-16 ***
+stateok  2.93257    0.18428  15.913  &lt; 2e-16 ***
+stateor  2.30963    0.08117  28.453  &lt; 2e-16 ***
+statepa  1.71016    0.08648  19.776  &lt; 2e-16 ***
+stateri  1.21258    0.07753  15.640  &lt; 2e-16 ***
+statesc  4.03480    0.35479  11.372  &lt; 2e-16 ***
+statesd  2.47391    0.14121  17.519  &lt; 2e-16 ***
+statetn  2.60197    0.09162  28.398  &lt; 2e-16 ***
+statetx  2.56016    0.10853  23.589  &lt; 2e-16 ***
+stateut  2.31368    0.15453  14.972  &lt; 2e-16 ***
+statevt  2.51159    0.13973  17.975  &lt; 2e-16 ***
+stateva  2.18745    0.14664  14.917  &lt; 2e-16 ***
+statewa  1.81811    0.08233  22.084  &lt; 2e-16 ***
+statewv  2.58088    0.10767  23.971  &lt; 2e-16 ***
+statewi  1.71836    0.07746  22.185  &lt; 2e-16 ***
+statewy  3.24913    0.07233  44.922  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1899 on 287 degrees of freedom
+Multiple R-squared:  0.9931,    Adjusted R-squared:  0.992 
+F-statistic: 847.8 on 49 and 287 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Time fixed effects</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate <span class="sc">~</span> beertax <span class="sc">+</span> year <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> df) <span class="sc">%&gt;%</span> </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate ~ beertax + year - 1, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.06068 -0.38427 -0.09853  0.26781  2.23447 
+
+Coefficients:
+         Estimate Std. Error t value Pr(&gt;|t|)    
+beertax   0.36634    0.06260   5.852 1.18e-08 ***
+year1982  1.89485    0.08566  22.121  &lt; 2e-16 ***
+year1983  1.81281    0.08571  21.151  &lt; 2e-16 ***
+year1984  1.82311    0.08564  21.288  &lt; 2e-16 ***
+year1985  1.78430    0.08534  20.909  &lt; 2e-16 ***
+year1986  1.87873    0.08514  22.065  &lt; 2e-16 ***
+year1987  1.87931    0.08483  22.154  &lt; 2e-16 ***
+year1988  1.89382    0.08448  22.416  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.5471 on 328 degrees of freedom
+Multiple R-squared:  0.9349,    Adjusted R-squared:  0.9333 
+F-statistic: 588.7 on 8 and 328 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># State fixed effects and time fixed effects</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(frate <span class="sc">~</span> beertax <span class="sc">+</span> state <span class="sc">+</span> year <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> df) <span class="sc">%&gt;%</span> </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = frate ~ beertax + state + year - 1, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.59556 -0.08096  0.00143  0.08234  0.83883 
+
+Coefficients:
+         Estimate Std. Error t value Pr(&gt;|t|)    
+beertax  -0.63998    0.19738  -3.242  0.00133 ** 
+stateal   3.51137    0.33250  10.560  &lt; 2e-16 ***
+stateaz   2.96451    0.09933  29.846  &lt; 2e-16 ***
+statear   2.87284    0.14162  20.286  &lt; 2e-16 ***
+stateca   2.02618    0.07857  25.787  &lt; 2e-16 ***
+stateco   2.04984    0.08594  23.851  &lt; 2e-16 ***
+statect   1.67125    0.08989  18.592  &lt; 2e-16 ***
+statede   2.22711    0.08264  26.951  &lt; 2e-16 ***
+statefl   3.25132    0.23590  13.782  &lt; 2e-16 ***
+statega   4.02300    0.49087   8.196 8.92e-15 ***
+stateid   2.86242    0.10606  26.990  &lt; 2e-16 ***
+stateil   1.57287    0.08380  18.769  &lt; 2e-16 ***
+statein   2.07123    0.09512  21.775  &lt; 2e-16 ***
+stateia   1.98709    0.10976  18.103  &lt; 2e-16 ***
+stateks   2.30707    0.11663  19.781  &lt; 2e-16 ***
+stateky   2.31659    0.08604  26.923  &lt; 2e-16 ***
+statela   2.67772    0.17390  15.398  &lt; 2e-16 ***
+stateme   2.41713    0.17116  14.122  &lt; 2e-16 ***
+statemd   1.82731    0.08828  20.700  &lt; 2e-16 ***
+statema   1.42335    0.09272  15.352  &lt; 2e-16 ***
+statemi   2.04488    0.12516  16.338  &lt; 2e-16 ***
+statemn   1.63488    0.10051  16.266  &lt; 2e-16 ***
+statems   3.49146    0.22311  15.649  &lt; 2e-16 ***
+statemo   2.23598    0.09931  22.515  &lt; 2e-16 ***
+statemt   3.17160    0.10136  31.291  &lt; 2e-16 ***
+statene   2.00846    0.11329  17.729  &lt; 2e-16 ***
+statenv   2.93322    0.08671  33.827  &lt; 2e-16 ***
+statenh   2.27245    0.15116  15.033  &lt; 2e-16 ***
+statenj   1.43016    0.07773  18.399  &lt; 2e-16 ***
+statenm   3.95748    0.10903  36.296  &lt; 2e-16 ***
+stateny   1.34849    0.08051  16.748  &lt; 2e-16 ***
+statenc   3.22630    0.26770  12.052  &lt; 2e-16 ***
+statend   1.90762    0.10945  17.428  &lt; 2e-16 ***
+stateoh   1.85664    0.10945  16.963  &lt; 2e-16 ***
+stateok   2.97776    0.19670  15.139  &lt; 2e-16 ***
+stateor   2.36597    0.08684  27.244  &lt; 2e-16 ***
+statepa   1.76563    0.09272  19.044  &lt; 2e-16 ***
+stateri   1.26964    0.08272  15.348  &lt; 2e-16 ***
+statesc   4.06496    0.37606  10.809  &lt; 2e-16 ***
+statesd   2.52317    0.15123  16.684  &lt; 2e-16 ***
+statetn   2.65670    0.09833  27.017  &lt; 2e-16 ***
+statetx   2.61282    0.11653  22.423  &lt; 2e-16 ***
+stateut   2.36165    0.16532  14.286  &lt; 2e-16 ***
+statevt   2.56100    0.14966  17.112  &lt; 2e-16 ***
+stateva   2.23618    0.15698  14.245  &lt; 2e-16 ***
+statewa   1.87424    0.08813  21.266  &lt; 2e-16 ***
+statewv   2.63364    0.11560  22.782  &lt; 2e-16 ***
+statewi   1.77545    0.08264  21.485  &lt; 2e-16 ***
+statewy   3.30791    0.07641  43.291  &lt; 2e-16 ***
+year1983 -0.07990    0.03835  -2.083  0.03813 *  
+year1984 -0.07242    0.03835  -1.888  0.06001 .  
+year1985 -0.12398    0.03844  -3.225  0.00141 ** 
+year1986 -0.03786    0.03859  -0.981  0.32731    
+year1987 -0.05090    0.03897  -1.306  0.19260    
+year1988 -0.05180    0.03962  -1.307  0.19215    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1879 on 281 degrees of freedom
+Multiple R-squared:  0.9934,    Adjusted R-squared:  0.9921 
+F-statistic: 771.5 on 55 and 281 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>For these regressions, we need to be careful with the standard errors. Normally, we assume homoskedasticity, and for longitudinal data, we do not want there to be correlation between the unobserved variables. However, <span class="math inline">\(U_{it}\)</span> will naturally be correlated with <span class="math inline">\(U_{it+1}\)</span> because they are both for the same unit. Similarly, <span class="math inline">\(U_{it}\)</span> will be correlated with <span class="math inline">\(U_{jt}\)</span> because they are both for the same time period.</p>
+<p>We can cluster the standard errors to allow for heteroskedasticity and autocorrelated errors within the cluster, but not across clusters. To do, we can use <code>plm</code> so that we have a <code>plm</code> object rather than an <code>lm</code> object. Then, we can use <code>coeftest()</code> with the <code>sandwich</code> package to calculate the clustered standard errors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sandwich)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>plm_out <span class="ot">&lt;-</span> <span class="fu">plm</span>(frate <span class="sc">~</span> beertax,</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> df,</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"state"</span>, <span class="st">"year"</span>),</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">model =</span> <span class="st">"within"</span>,</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">effect =</span> <span class="st">"twoways"</span>) <span class="co"># This does state and year fixed effects</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(plm_out, <span class="at">vcov =</span> vcovHC, <span class="at">type =</span> <span class="st">"HC1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+t test of coefficients:
+
+        Estimate Std. Error t value Pr(&gt;|t|)  
+beertax -0.63998    0.35015 -1.8277  0.06865 .
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="difference-in-differences" class="level2" data-number="19.3">
+<h2 data-number="19.3" class="anchored" data-anchor-id="difference-in-differences"><span class="header-section-number">19.3</span> Difference-in-Differences</h2>
+<p>Now we are comfortable with panel data and fixed effects. In some cases, you may be comfortable assuming that the fixed effects account for all possible unobserved heterogeneity that could be correlated with the covariate of interest (e.g., beer taxes), and interpret the above estimates causally. This is hard to argue though, and there may be something better we can do: difference-in-differences.</p>
+<p>Suppose there is a large change in the taxes in Texas but a small change in the taxes in Oklahoma. If we compare Texas to Oklahoma in 1988, we will see the difference between the two states after the policy, but what if this is all due to differences between the states? If we compare Texas in 1982 to Texas in 1988, we may see a difference but what if this is all due to differences between the years? We can take the “difference-in-differences” to account for both possibilities and just see the change due to the policy change. Here are the means for each of the groups before (pre) and after (post) the policy:</p>
+<p><span class="math display">\[\begin{equation*}
+(Y_{\text{Treatment, Post}} - Y_{\text{Treatment, Pre}}) - (Y_{\text{Control, Post}} - Y_{\text{Control, Pre}})
+\end{equation*}\]</span></p>
+<p>Here is an illustration of the logic from <span class="citation" data-cites="hanck_introduction_2018">Hanck et al. (<a href="#ref-hanck_introduction_2018" role="doc-biblioref">2018</a>)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Source:</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="co"># https://bookdown.org/machar1991/ITER/13-4-quasi-experiments.html</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">8</span>), </span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">type =</span> <span class="st">"p"</span>,</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">12</span>),</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">1.3</span>),</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"The Differences-in-Differences Estimator"</span>,</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Period"</span>,</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Y"</span>,</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"steelblue"</span>,</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">xaxt =</span> <span class="st">"n"</span>,</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">yaxt =</span> <span class="st">"n"</span>)</span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"before"</span>, <span class="st">"after"</span>))</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">13</span>))</span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a><span class="co"># add treatment group</span></span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">11</span>), </span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="st">"darkred"</span>,</span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> <span class="dv">20</span>)</span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a><span class="co"># add line segments</span></span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">7</span>, <span class="dv">11</span>), <span class="at">col =</span> <span class="st">"darkred"</span>)</span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">8</span>), <span class="at">col =</span> <span class="st">"steelblue"</span>)</span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">7</span>, <span class="dv">9</span>), <span class="at">col =</span> <span class="st">"darkred"</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">9</span>, <span class="dv">11</span>), <span class="at">col =</span> <span class="st">"black"</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb50-28"><a href="#cb50-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-29"><a href="#cb50-29" aria-hidden="true" tabindex="-1"></a><span class="co"># add annotations</span></span>
+<span id="cb50-30"><a href="#cb50-30" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="fu">expression</span>(<span class="fu">hat</span>(beta)[<span class="dv">1</span>]<span class="sc">^</span>{DID}), <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">pos =</span> <span class="dv">4</span>)</span>
+<span id="cb50-31"><a href="#cb50-31" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">0</span>, <span class="fl">5.5</span>, <span class="st">"s. mean control"</span>, <span class="at">cex =</span> <span class="fl">0.8</span> , <span class="at">pos =</span> <span class="dv">4</span>)</span>
+<span id="cb50-32"><a href="#cb50-32" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">0</span>, <span class="fl">6.8</span>, <span class="st">"s. mean treatment"</span>, <span class="at">cex =</span> <span class="fl">0.8</span> , <span class="at">pos =</span> <span class="dv">4</span>)</span>
+<span id="cb50-33"><a href="#cb50-33" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">1</span>, <span class="fl">7.9</span>, <span class="st">"s. mean control"</span>, <span class="at">cex =</span> <span class="fl">0.8</span> , <span class="at">pos =</span> <span class="dv">4</span>)</span>
+<span id="cb50-34"><a href="#cb50-34" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">1</span>, <span class="fl">11.1</span>, <span class="st">"s. mean treatment"</span>, <span class="at">cex =</span> <span class="fl">0.8</span> , <span class="at">pos =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="19_Difference_in_Differences_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" alt="A line plot illustrating the Differences-in-Differences estimator. It shows mean values for a treatment group and a control group before and after an intervention. The control group mean rises slightly from before to after. The treatment group mean rises more sharply. A dashed line shows the counterfactual trend for the treatment group if there had been no intervention, and a vertical dashed line indicates the DID estimate, the difference between the actual post-treatment mean and the counterfactual." width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let us simulate some data to see how we estimate difference-in-differences.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Source:</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="co"># https://bookdown.org/machar1991/ITER/13-4-quasi-experiments.html</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">470500</span>)</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample size</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Treatment effect</span></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>TEffect <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate treatment dummy</span></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>TDummy <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, N<span class="sc">/</span><span class="dv">2</span>), <span class="fu">rep</span>(<span class="dv">1</span>, N<span class="sc">/</span><span class="dv">2</span>))</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate pre- and post-treatment values of the dependent variable</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>y_pre <span class="ot">&lt;-</span> <span class="dv">7</span> <span class="sc">+</span> <span class="fu">rnorm</span>(N)</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>y_pre[<span class="dv">1</span><span class="sc">:</span>N<span class="sc">/</span><span class="dv">2</span>] <span class="ot">&lt;-</span> y_pre[<span class="dv">1</span><span class="sc">:</span>N<span class="sc">/</span><span class="dv">2</span>] <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>y_post <span class="ot">&lt;-</span> <span class="dv">7</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">+</span> TEffect <span class="sc">*</span> TDummy <span class="sc">+</span> <span class="fu">rnorm</span>(N)</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a>y_post[<span class="dv">1</span><span class="sc">:</span>N<span class="sc">/</span><span class="dv">2</span>] <span class="ot">&lt;-</span> y_post[<span class="dv">1</span><span class="sc">:</span>N<span class="sc">/</span><span class="dv">2</span>] <span class="sc">-</span> <span class="dv">1</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can compute the difference-in-difference estimator by hand.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(y_post[TDummy <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(y_pre[TDummy <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> </span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>(<span class="fu">mean</span>(y_post[TDummy <span class="sc">==</span> <span class="dv">0</span>]) <span class="sc">-</span> <span class="fu">mean</span>(y_pre[TDummy <span class="sc">==</span> <span class="dv">0</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.947658</code></pre>
+</div>
+</div>
+<p>We can use a linear model:</p>
+<p><span class="math display">\[\begin{equation*}
+\Delta Y_i = \beta_0 + \beta_1 D_i + U_i.
+\end{equation*}\]</span></p>
+<p>Notice that we do not need to have everything in a dataset to use <code>lm()</code>. We can also rely on standalone vectors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(<span class="fu">I</span>(y_post <span class="sc">-</span> y_pre) <span class="sc">~</span> TDummy) <span class="sc">%&gt;%</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = I(y_post - y_pre) ~ TDummy)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.1025 -0.9670 -0.0932  0.9622  4.4390 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   2.0414     0.1466   13.92   &lt;2e-16 ***
+TDummy        3.9477     0.2074   19.04   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.466 on 198 degrees of freedom
+Multiple R-squared:  0.6467,    Adjusted R-squared:  0.6449 
+F-statistic: 362.4 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>We can also use this equation:</p>
+<p><span class="math display">\[\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 D_i + \beta_2 Post_t + \beta (Post_t \times D_i) + U_{it}
+\end{equation*}\]</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">Y =</span> <span class="fu">c</span>(y_pre, y_post),</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">D =</span> <span class="fu">rep</span>(TDummy, <span class="dv">2</span>), </span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">Post =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"1"</span>, N), <span class="fu">rep</span>(<span class="st">"2"</span>, N)))</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(Y <span class="sc">~</span> D <span class="sc">*</span> Post, <span class="at">data =</span> df) <span class="sc">%&gt;%</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ D * Post, data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.8788 -0.6071 -0.0357  0.6399  3.8692 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   5.9209     0.1020  58.044   &lt;2e-16 ***
+D             1.2918     0.1443   8.955   &lt;2e-16 ***
+Post2         2.0414     0.1443  14.151   &lt;2e-16 ***
+D:Post2       3.9477     0.2040  19.350   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.02 on 396 degrees of freedom
+Multiple R-squared:  0.8816,    Adjusted R-squared:  0.8807 
+F-statistic: 982.9 on 3 and 396 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>The key assumption is commonly called “parallel trends.” This boils down to: in the absence of treatment, the trends of the treatment and the control group would be the same. We can see this most easily in the graph. This means that there cannot be unobserved factors that vary by time and by unit that are correlated with treatment.</p>
+</section>
+<section id="further-reading" class="level2" data-number="19.4">
+<h2 data-number="19.4" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">19.4</span> Further Reading</h2>
+<p>These notes are based on chapters 10 and 13 of <span class="citation" data-cites="hanck_introduction_2018">Hanck et al. (<a href="#ref-hanck_introduction_2018" role="doc-biblioref">2018</a>)</span>. See that source for more information.</p>
+<section id="references" class="level3" data-number="19.4.1">
+<h3 data-number="19.4.1" class="anchored" data-anchor-id="references"><span class="header-section-number">19.4.1</span> References</h3>
+
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-hanck_introduction_2018" class="csl-entry" role="listitem">
+Hanck, Cristoph, Martin Arnold, Alexander Gerber, and Martin Schmelzer. 2018. <em>Introduction to <span>Econometrics</span> with <span>R</span></em>. <a href="https://bookdown.org/machar1991/ITER/">https://bookdown.org/machar1991/ITER/</a>.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script>
+document.querySelectorAll("tr.header").forEach(function(row) {
+  const firstTh = row.querySelector("th");
+  if (firstTh && firstTh.textContent.trim() === "") {
+    firstTh.textContent = "Model";
+  }
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./18_Discontinuity_Designs.html" class="pagination-link" aria-label="Discontinuity Designs">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Discontinuity Designs</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./20_EventStudies.html" class="pagination-link" aria-label="Event Studies">
+        <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Event Studies</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

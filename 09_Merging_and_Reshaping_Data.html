@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>9&nbsp; Merging and Reshaping Data – Data Science for Economic and Social Issues</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./10_Summary_Statistics.html" rel="next">
+<link href="./08_Data_Management.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-234273d1456647dabc34a594ac50e507.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f9a69956bae15ee19585fe71e7f92375.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>
+// This script is used to dynamically set the aria-label attribute for elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Set aria-label for the label element if it is empty
+    const label = document.querySelector('label.aa-Label[for^="autocomplete-0-input"]');
+    // Check if the label exists and is empty
+    if (label && !label.textContent.trim()){
+        label.setAttribute('aria-label', 'Search');
+    }
+});
+</script>
+
+<script src="scroll-access.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07_Data_Loading_Saving.html">Cleaning and Describing Data</a></li><li class="breadcrumb-item"><a href="./09_Merging_and_Reshaping_Data.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Merging and Reshaping Data</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Science for Economic and Social Issues</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Setup</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_Installation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Quick Start: Installation Instructions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_Setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Getting Setup</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03_Command_Line_and_Git.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Command Line and Git</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">R and R Markdown Basics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04_R_Basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">R Basics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05_R_Markdown.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">R Markdown</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06_Structure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Code Structure</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Cleaning and Describing Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07_Data_Loading_Saving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Loading and Saving Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08_Data_Management.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Data Management</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09_Merging_and_Reshaping_Data.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Merging and Reshaping Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10_Summary_Statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Summary Statistics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_Graphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Data Visualization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_Geographic_Data_and_Mapping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Geographic Data and Mapping</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Statistical Methods and Econometrics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13_CLT.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Central Limit Theorem</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14_Inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15_Regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16_Program_Evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Program Evaluation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17_Instrumental_Variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Instrumental Variables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18_Discontinuity_Designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Discontinuity Designs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19_Difference_in_Differences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Fixed Effects and Difference-in-Differences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_EventStudies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Event Studies</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_MachineLearning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Machine Learning Basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#merge-built-in-functions" id="toc-merge-built-in-functions" class="nav-link active" data-scroll-target="#merge-built-in-functions"><span class="header-section-number">9.1</span> Merge: Built-in Functions</a></li>
+  <li><a href="#merge-tidyverse-functions" id="toc-merge-tidyverse-functions" class="nav-link" data-scroll-target="#merge-tidyverse-functions"><span class="header-section-number">9.2</span> Merge: tidyverse functions</a></li>
+  <li><a href="#reshape-tidyr" id="toc-reshape-tidyr" class="nav-link" data-scroll-target="#reshape-tidyr"><span class="header-section-number">9.3</span> Reshape: <code>tidyr</code></a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">9.4</span> Further Reading</a>
+  <ul class="collapse">
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">9.4.1</span> References</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07_Data_Loading_Saving.html">Cleaning and Describing Data</a></li><li class="breadcrumb-item"><a href="./09_Merging_and_Reshaping_Data.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Merging and Reshaping Data</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Merging and Reshaping Data</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Here are all the libraries you should install for this chapter.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="merge-built-in-functions" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="merge-built-in-functions"><span class="header-section-number">9.1</span> Merge: Built-in Functions</h2>
+<p>As discussed in <a href="04_R_Basics.html#chapter4">chapter 4</a>, <code>rbind()</code> can be used to append additional observations. If using this approach, it is better to transform the new row(s) into a data frame. This will help avoid silently changing a variable type.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"Data/Gapminder/gapminder_large.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   195 obs. of  21 variables:
+ $ country     : chr  "Afghanistan" "Albania" "Algeria" "Andorra" ...
+ $ gdp_2015    : int  574 4520 4780 42100 3750 13300 10600 3920 55100 47800 ...
+ $ gini_2015   : num  36.8 29 27.6 40 42.6 40 41.8 31.9 32.3 30.6 ...
+ $ region      : chr  "Asia &amp; Pacific" "Europe" "Arab States" "Europe" ...
+ $ co2_2015    : num  0.262 1.6 3.8 5.97 1.22 5.84 4.64 1.65 16.8 7.7 ...
+ $ co2_2016    : num  0.245 1.57 3.64 6.07 1.18 5.9 4.6 1.76 17 7.7 ...
+ $ co2_2017    : num  0.247 1.61 3.56 6.27 1.14 5.89 4.55 1.7 17 7.94 ...
+ $ co2_2018    : num  0.254 1.59 3.69 6.12 1.12 5.88 4.41 1.89 16.9 7.75 ...
+ $ cpi_2012    : int  8 33 34 NA 22 NA 35 34 85 69 ...
+ $ cpi_2013    : int  8 31 36 NA 23 NA 34 36 81 69 ...
+ $ cpi_2014    : int  12 33 36 NA 19 NA 34 37 80 72 ...
+ $ cpi_2015    : int  11 36 36 NA 15 NA 32 35 79 76 ...
+ $ cpi_2016    : int  15 39 34 NA 18 NA 36 33 79 75 ...
+ $ cpi_2017    : int  15 38 33 NA 19 NA 39 35 77 75 ...
+ $ lifeexp_2012: num  60.8 77.8 76.8 82.4 61.3 76.7 76 74.7 82.5 81 ...
+ $ lifeexp_2013: num  61.3 77.9 76.9 82.5 61.9 76.8 76.1 75.2 82.6 81.2 ...
+ $ lifeexp_2014: num  61.2 77.9 77 82.5 62.8 76.8 76.4 75.3 82.5 81.4 ...
+ $ lifeexp_2015: num  61.2 78 77.1 82.6 63.3 76.9 76.5 75.3 82.5 81.5 ...
+ $ lifeexp_2016: num  61.2 78.1 77.4 82.7 63.8 77 76.5 75.4 82.5 81.7 ...
+ $ lifeexp_2017: num  63.4 78.2 77.7 82.7 64.2 77 76.7 75.6 82.4 81.8 ...
+ $ lifeexp_2018: num  63.7 78.3 77.9 NA 64.6 77.2 76.8 75.8 82.5 81.9 ...</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "COUNTRY"      "gdp_2015"     "gini_2015"    "region"       "co2_2015"    
+ [6] "co2_2016"     "co2_2017"     "co2_2018"     "cpi_2012"     "cpi_2013"    
+[11] "cpi_2014"     "cpi_2015"     "cpi_2016"     "cpi_2017"     "lifeexp_2012"
+[16] "lifeexp_2013" "lifeexp_2014" "lifeexp_2015" "lifeexp_2016" "lifeexp_2017"
+[21] "lifeexp_2018"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "COUNTRY"      "GDP"          "GINI"         "region"       "co2_2015"    
+ [6] "co2_2016"     "co2_2017"     "co2_2018"     "cpi_2012"     "cpi_2013"    
+[11] "cpi_2014"     "cpi_2015"     "cpi_2016"     "cpi_2017"     "lifeexp_2012"
+[16] "lifeexp_2013" "lifeexp_2014" "lifeexp_2015" "lifeexp_2016" "lifeexp_2017"
+[21] "lifeexp_2018"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df[<span class="dv">1</span><span class="sc">:</span><span class="dv">98</span>, ]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df[<span class="dv">99</span><span class="sc">:</span><span class="dv">195</span>, ]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(df1, df2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>An even more robust approach is to use the <code>merge()</code> function. This allows for the two data frames to have different variables and similar observations. As long as there is at least one variable common to both data frames, they can be merged. Here is a very simple example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">c</span>(<span class="st">"COUNTRY"</span>, <span class="st">"region"</span>)]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df[<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>, <span class="fu">c</span>(<span class="st">"COUNTRY"</span>, <span class="st">"GDP"</span>, <span class="st">"GINI"</span>)]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">merge</span>(df1, df2, <span class="at">by =</span> <span class="st">"COUNTRY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      COUNTRY         region   GDP GINI
+1 Afghanistan Asia &amp; Pacific   574 36.8
+2     Albania         Europe  4520 29.0
+3     Algeria    Arab States  4780 27.6
+4     Andorra         Europe 42100 40.0
+5      Angola         Africa  3750 42.6</code></pre>
+</div>
+</div>
+<p>Note that <code>df2</code> has 7 observations while <code>df1</code> only has 5. Yet, the output of the merge has 5 observations. This is because the arguments <code>all.x</code> and <code>all.y</code> are set to <code>FALSE</code> by default. This means that only rows that appear in both are present in the output. If we set <code>all.y = TRUE</code>, all the rows of <code>df2</code> are added with missing values for <code>region</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">merge</span>(df1, df2, <span class="at">by =</span> <span class="st">"COUNTRY"</span>, <span class="at">all.y =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              COUNTRY         region   GDP GINI
+1         Afghanistan Asia &amp; Pacific   574 36.8
+2             Albania         Europe  4520 29.0
+3             Algeria    Arab States  4780 27.6
+4             Andorra         Europe 42100 40.0
+5              Angola         Africa  3750 42.6
+6 Antigua and Barbuda           &lt;NA&gt; 13300 40.0
+7           Argentina           &lt;NA&gt; 10600 41.8</code></pre>
+</div>
+</div>
+<p>If you want to keep all the rows in both data frames, the argument <code>all = TRUE</code> sets both <code>all.x = TRUE</code> and <code>all.y = TRUE</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">merge</span>(df1, df2, <span class="at">by =</span> <span class="st">"COUNTRY"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              COUNTRY         region   GDP GINI
+1         Afghanistan Asia &amp; Pacific   574 36.8
+2             Albania         Europe  4520 29.0
+3             Algeria    Arab States  4780 27.6
+4             Andorra         Europe 42100 40.0
+5              Angola         Africa  3750 42.6
+6 Antigua and Barbuda           &lt;NA&gt; 13300 40.0
+7           Argentina           &lt;NA&gt; 10600 41.8</code></pre>
+</div>
+</div>
+<p>Suppose the variable you are merging on has different names in the two data frames. The arguments <code>by.x</code> and <code>by.y</code> allow for you to specify both variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df1)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"country"</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">merge</span>(df1, df2, <span class="at">by.x =</span> <span class="st">"country"</span>, <span class="at">by.y =</span> <span class="st">"COUNTRY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      country         region   GDP GINI
+1 Afghanistan Asia &amp; Pacific   574 36.8
+2     Albania         Europe  4520 29.0
+3     Algeria    Arab States  4780 27.6
+4     Andorra         Europe 42100 40.0
+5      Angola         Africa  3750 42.6</code></pre>
+</div>
+</div>
+<p>If the two data frames have different variables with the same name, the merge will not combine these columns. This even applies if the columns are different types.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df[<span class="fu">c</span>(<span class="st">"COUNTRY"</span>, <span class="st">"region"</span>, <span class="st">"GDP"</span>)]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>df1<span class="sc">$</span>GDP <span class="ot">&lt;-</span> <span class="fu">as.character</span>(df1<span class="sc">$</span>GDP) <span class="co"># GDP is now character in df1</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">merge</span>(df1, df2, <span class="at">by =</span> <span class="st">"COUNTRY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              COUNTRY              region GDP.x GDP.y GINI
+1         Afghanistan      Asia &amp; Pacific   574   574 36.8
+2             Albania              Europe  4520  4520 29.0
+3             Algeria         Arab States  4780  4780 27.6
+4             Andorra              Europe 42100 42100 40.0
+5              Angola              Africa  3750  3750 42.6
+6 Antigua and Barbuda South/Latin America 13300 13300 40.0
+7           Argentina South/Latin America 10600 10600 41.8</code></pre>
+</div>
+</div>
+</section>
+<section id="merge-tidyverse-functions" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="merge-tidyverse-functions"><span class="header-section-number">9.2</span> Merge: tidyverse functions</h2>
+<p>Merging data frames is useful when there are several data frames with similar observations but different variables. To demonstrate the join functions in <code>dplyr</code>, we have two datasets. One is the population of all countries and the other is the population of all countries that begin with “A.” Neither of these datasets have duplicates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"Data/Gapminder/population.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 195 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (1): country
+dbl (1): population
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>popA <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"Data/Gapminder/population_A.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 11 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (1): country
+dbl (1): population
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>tib1 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"Data/Gapminder/gapminder.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 197 Columns: 4
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (2): country, region
+dbl (2): gdp, gini
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>((tib1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>spc_tbl_ [197 × 4] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+ $ country: chr [1:197] "Afghanistan" "Albania" "Algeria" "Andorra" ...
+ $ gdp    : num [1:197] 574 4520 4780 42100 3750 13300 10600 3920 55100 47800 ...
+ $ gini   : num [1:197] 36.8 29 27.6 40 42.6 40 41.8 31.9 32.3 30.6 ...
+ $ region : chr [1:197] "Asia &amp; Pacific" "Europe" "Arab States" "Europe" ...
+ - attr(*, "spec")=
+  .. cols(
+  ..   country = col_character(),
+  ..   gdp = col_double(),
+  ..   gini = col_double(),
+  ..   region = col_character()
+  .. )
+ - attr(*, "problems")=&lt;externalptr&gt; </code></pre>
+</div>
+</div>
+<p>The different join functions relate to which observations are kept. In <code>full_join()</code>, all observations in the two data frames are kept, even if there are unmatched observations. The argument <code>by</code> indicates which variable on which to match.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">full_join</span>(tib1, pop, <span class="at">by =</span> <span class="st">"country"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 197 × 5
+   country               gdp  gini region              population
+   &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;
+ 1 Afghanistan           574  36.8 Asia &amp; Pacific        34400000
+ 2 Albania              4520  29   Europe                 2890000
+ 3 Algeria              4780  27.6 Arab States           39700000
+ 4 Andorra             42100  40   Europe                   78000
+ 5 Angola               3750  42.6 Africa                27900000
+ 6 Antigua and Barbuda 13300  40   South/Latin America      93600
+ 7 Argentina           10600  41.8 South/Latin America   43100000
+ 8 Armenia              3920  31.9 Europe                 2930000
+ 9 Australia           55100  32.3 Asia &amp; Pacific        23900000
+10 Austria             47800  30.6 Europe                 8680000
+# ℹ 187 more rows</code></pre>
+</div>
+</div>
+<p>The function <code>inner_join()</code> only keeps observations that are present in both data frames. In this case, that is only countries that begin with “A.”</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inner_join</span>(tib1, popA, <span class="at">by =</span> <span class="st">"country"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 11 × 5
+   country               gdp  gini region              population
+   &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;
+ 1 Afghanistan           574  36.8 Asia &amp; Pacific        34400000
+ 2 Albania              4520  29   Europe                 2890000
+ 3 Algeria              4780  27.6 Arab States           39700000
+ 4 Andorra             42100  40   Europe                   78000
+ 5 Angola               3750  42.6 Africa                27900000
+ 6 Antigua and Barbuda 13300  40   South/Latin America      93600
+ 7 Argentina           10600  41.8 South/Latin America   43100000
+ 8 Armenia              3920  31.9 Europe                 2930000
+ 9 Australia           55100  32.3 Asia &amp; Pacific        23900000
+10 Austria             47800  30.6 Europe                 8680000
+11 Azerbaijan           6060  32.4 Asia &amp; Pacific         9620000</code></pre>
+</div>
+</div>
+<p>The function <code>left_join()</code> only keeps from the data frame in the left argument (<code>tib1</code> in this case).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">left_join</span>(tib1, popA, <span class="at">by =</span> <span class="st">"country"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 197 × 5
+   country               gdp  gini region              population
+   &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;
+ 1 Afghanistan           574  36.8 Asia &amp; Pacific        34400000
+ 2 Albania              4520  29   Europe                 2890000
+ 3 Algeria              4780  27.6 Arab States           39700000
+ 4 Andorra             42100  40   Europe                   78000
+ 5 Angola               3750  42.6 Africa                27900000
+ 6 Antigua and Barbuda 13300  40   South/Latin America      93600
+ 7 Argentina           10600  41.8 South/Latin America   43100000
+ 8 Armenia              3920  31.9 Europe                 2930000
+ 9 Australia           55100  32.3 Asia &amp; Pacific        23900000
+10 Austria             47800  30.6 Europe                 8680000
+# ℹ 187 more rows</code></pre>
+</div>
+</div>
+<p>The function <code>right_join()</code> is the same except it only keeps the observations from the data frame in the right argument.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">right_join</span>(tib1, popA, <span class="at">by =</span> <span class="st">"country"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 11 × 5
+   country               gdp  gini region              population
+   &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;
+ 1 Afghanistan           574  36.8 Asia &amp; Pacific        34400000
+ 2 Albania              4520  29   Europe                 2890000
+ 3 Algeria              4780  27.6 Arab States           39700000
+ 4 Andorra             42100  40   Europe                   78000
+ 5 Angola               3750  42.6 Africa                27900000
+ 6 Antigua and Barbuda 13300  40   South/Latin America      93600
+ 7 Argentina           10600  41.8 South/Latin America   43100000
+ 8 Armenia              3920  31.9 Europe                 2930000
+ 9 Australia           55100  32.3 Asia &amp; Pacific        23900000
+10 Austria             47800  30.6 Europe                 8680000
+11 Azerbaijan           6060  32.4 Asia &amp; Pacific         9620000</code></pre>
+</div>
+</div>
+<p>The function <code>semi_join()</code> keeps all rows in <code>tib1</code> that have a match in <code>popA</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">semi_join</span>(tib1, popA, <span class="at">by =</span> <span class="st">"country"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 11 × 4
+   country               gdp  gini region             
+   &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;              
+ 1 Afghanistan           574  36.8 Asia &amp; Pacific     
+ 2 Albania              4520  29   Europe             
+ 3 Algeria              4780  27.6 Arab States        
+ 4 Andorra             42100  40   Europe             
+ 5 Angola               3750  42.6 Africa             
+ 6 Antigua and Barbuda 13300  40   South/Latin America
+ 7 Argentina           10600  41.8 South/Latin America
+ 8 Armenia              3920  31.9 Europe             
+ 9 Australia           55100  32.3 Asia &amp; Pacific     
+10 Austria             47800  30.6 Europe             
+11 Azerbaijan           6060  32.4 Asia &amp; Pacific     </code></pre>
+</div>
+</div>
+<p>The function <code>anti_join()</code> keeps all rows in <code>tib1</code> that do not have a match in <code>popA</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anti_join</span>(tib1, popA, <span class="at">by =</span> <span class="st">"country"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 186 × 4
+   country      gdp  gini region             
+   &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;              
+ 1 Bahamas    27500  43.7 South/Latin America
+ 2 Bahrain    22400  40   Arab States        
+ 3 Bangladesh  1000  32.3 Asia &amp; Pacific     
+ 4 Barbados   15800  43.8 South/Latin America
+ 5 Belarus     6380  26.9 Europe             
+ 6 Belgium    45500  27.8 Europe             
+ 7 Belize      4300  53.3 South/Latin America
+ 8 Benin       1130  46.9 Africa             
+ 9 Bhutan      2780  38   Asia &amp; Pacific     
+10 Bolivia     2360  46.3 South/Latin America
+# ℹ 176 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="reshape-tidyr" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="reshape-tidyr"><span class="header-section-number">9.3</span> Reshape: <code>tidyr</code></h2>
+<p>The <code>tidyr</code> package provides an efficient way to reshape and reformat data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>tib1 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"Data/Gapminder/gapminder_large.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 195 Columns: 21
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (2): country, region
+dbl (19): gdp_2015, gini_2015, co2_2015, co2_2016, co2_2017, co2_2018, cpi_2...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tib1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 21
+  country gdp_2015 gini_2015 region co2_2015 co2_2016 co2_2017 co2_2018 cpi_2012
+  &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 Afghan…      574      36.8 Asia …    0.262    0.245    0.247    0.254        8
+2 Albania     4520      29   Europe    1.6      1.57     1.61     1.59        33
+3 Algeria     4780      27.6 Arab …    3.8      3.64     3.56     3.69        34
+4 Andorra    42100      40   Europe    5.97     6.07     6.27     6.12        NA
+5 Angola      3750      42.6 Africa    1.22     1.18     1.14     1.12        22
+6 Antigu…    13300      40   South…    5.84     5.9      5.89     5.88        NA
+# ℹ 12 more variables: cpi_2013 &lt;dbl&gt;, cpi_2014 &lt;dbl&gt;, cpi_2015 &lt;dbl&gt;,
+#   cpi_2016 &lt;dbl&gt;, cpi_2017 &lt;dbl&gt;, lifeexp_2012 &lt;dbl&gt;, lifeexp_2013 &lt;dbl&gt;,
+#   lifeexp_2014 &lt;dbl&gt;, lifeexp_2015 &lt;dbl&gt;, lifeexp_2016 &lt;dbl&gt;,
+#   lifeexp_2017 &lt;dbl&gt;, lifeexp_2018 &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Wide data have one row per unit while long data have more than one row per unit. To convert wide data to long, use <code>pivot_longer()</code>. There are several different ways to get the same output.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Select columns using tidy-select</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Dictate pattern with names_sep</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>long_tib1 <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(tib1,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">contains</span>(<span class="st">"_"</span>),</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"var"</span>, <span class="st">"year"</span>),</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">names_sep =</span> <span class="st">"_"</span>)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Select columns using column indices</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(tib1,</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>             <span class="dv">5</span><span class="sc">:</span><span class="dv">21</span>,</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"var"</span>, <span class="st">"year"</span>),</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">names_sep =</span> <span class="st">"_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3,315 × 7
+   country     gdp_2015 gini_2015 region         var   year   value
+   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt; &lt;chr&gt;  &lt;dbl&gt;
+ 1 Afghanistan      574      36.8 Asia &amp; Pacific co2   2015   0.262
+ 2 Afghanistan      574      36.8 Asia &amp; Pacific co2   2016   0.245
+ 3 Afghanistan      574      36.8 Asia &amp; Pacific co2   2017   0.247
+ 4 Afghanistan      574      36.8 Asia &amp; Pacific co2   2018   0.254
+ 5 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2012   8    
+ 6 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2013   8    
+ 7 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2014  12    
+ 8 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2015  11    
+ 9 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2016  15    
+10 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2017  15    
+# ℹ 3,305 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dictate pattern with names_pattern</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(tib1,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>             <span class="dv">5</span><span class="sc">:</span><span class="dv">21</span>,</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"var"</span>, <span class="st">"year"</span>),</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">names_pattern =</span> <span class="st">"(.*)_(.*)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3,315 × 7
+   country     gdp_2015 gini_2015 region         var   year   value
+   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt; &lt;chr&gt;  &lt;dbl&gt;
+ 1 Afghanistan      574      36.8 Asia &amp; Pacific co2   2015   0.262
+ 2 Afghanistan      574      36.8 Asia &amp; Pacific co2   2016   0.245
+ 3 Afghanistan      574      36.8 Asia &amp; Pacific co2   2017   0.247
+ 4 Afghanistan      574      36.8 Asia &amp; Pacific co2   2018   0.254
+ 5 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2012   8    
+ 6 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2013   8    
+ 7 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2014  12    
+ 8 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2015  11    
+ 9 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2016  15    
+10 Afghanistan      574      36.8 Asia &amp; Pacific cpi   2017  15    
+# ℹ 3,305 more rows</code></pre>
+</div>
+</div>
+<p>To go from long data to wide, use <code>pivot_wider</code>. There are several options to dictate the names of the newly created variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>wide_tib1 <span class="ot">&lt;-</span> <span class="fu">pivot_wider</span>(long_tib1,</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_from =</span> <span class="fu">c</span>(<span class="st">"var"</span>, <span class="st">"year"</span>),</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">values_from =</span> <span class="st">"value"</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(wide_tib1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 21
+  country region gdp_2015 gini_2015 co2_2015 co2_2016 co2_2017 co2_2018 cpi_2012
+  &lt;chr&gt;   &lt;chr&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 Afghan… Asia …      574      36.8    0.262    0.245    0.247    0.254        8
+2 Albania Europe     4520      29      1.6      1.57     1.61     1.59        33
+3 Algeria Arab …     4780      27.6    3.8      3.64     3.56     3.69        34
+4 Andorra Europe    42100      40      5.97     6.07     6.27     6.12        NA
+5 Angola  Africa     3750      42.6    1.22     1.18     1.14     1.12        22
+6 Antigu… South…    13300      40      5.84     5.9      5.89     5.88        NA
+# ℹ 12 more variables: cpi_2013 &lt;dbl&gt;, cpi_2014 &lt;dbl&gt;, cpi_2015 &lt;dbl&gt;,
+#   cpi_2016 &lt;dbl&gt;, cpi_2017 &lt;dbl&gt;, lifeexp_2012 &lt;dbl&gt;, lifeexp_2013 &lt;dbl&gt;,
+#   lifeexp_2014 &lt;dbl&gt;, lifeexp_2015 &lt;dbl&gt;, lifeexp_2016 &lt;dbl&gt;,
+#   lifeexp_2017 &lt;dbl&gt;, lifeexp_2018 &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_wider</span>(long_tib1,</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">names_from =</span> <span class="fu">c</span>(<span class="st">"var"</span>, <span class="st">"year"</span>),</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">values_from =</span> <span class="st">"value"</span>,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">names_sep =</span> <span class="st">"."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 195 × 21
+   country         region gdp.2015 gini.2015 co2.2015 co2.2016 co2.2017 co2.2018
+   &lt;chr&gt;           &lt;chr&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+ 1 Afghanistan     Asia …      574      36.8    0.262    0.245    0.247    0.254
+ 2 Albania         Europe     4520      29      1.6      1.57     1.61     1.59 
+ 3 Algeria         Arab …     4780      27.6    3.8      3.64     3.56     3.69 
+ 4 Andorra         Europe    42100      40      5.97     6.07     6.27     6.12 
+ 5 Angola          Africa     3750      42.6    1.22     1.18     1.14     1.12 
+ 6 Antigua and Ba… South…    13300      40      5.84     5.9      5.89     5.88 
+ 7 Argentina       South…    10600      41.8    4.64     4.6      4.55     4.41 
+ 8 Armenia         Europe     3920      31.9    1.65     1.76     1.7      1.89 
+ 9 Australia       Asia …    55100      32.3   16.8     17       17       16.9  
+10 Austria         Europe    47800      30.6    7.7      7.7      7.94     7.75 
+# ℹ 185 more rows
+# ℹ 13 more variables: cpi.2012 &lt;dbl&gt;, cpi.2013 &lt;dbl&gt;, cpi.2014 &lt;dbl&gt;,
+#   cpi.2015 &lt;dbl&gt;, cpi.2016 &lt;dbl&gt;, cpi.2017 &lt;dbl&gt;, lifeexp.2012 &lt;dbl&gt;,
+#   lifeexp.2013 &lt;dbl&gt;, lifeexp.2014 &lt;dbl&gt;, lifeexp.2015 &lt;dbl&gt;,
+#   lifeexp.2016 &lt;dbl&gt;, lifeexp.2017 &lt;dbl&gt;, lifeexp.2018 &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>It might be useful to reference this chapter on <a href="https://r4ds.had.co.nz/strings.html">strings and regular expressions</a>. There are many ways to represent different patterns in character strings, and a standardized approach exists to minimize the need to type out everything explicitly.</p>
+</section>
+<section id="further-reading" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">9.4</span> Further Reading</h2>
+<p>The above information comes from chapters 5.1-5.3, 6, and 21 of <span class="citation" data-cites="boehmke_data_2016">Boehmke (<a href="#ref-boehmke_data_2016" role="doc-biblioref">2016</a>)</span>, chapters 2.2.5 and 3 of <span class="citation" data-cites="zamora_saiz_introduction_2020">Zamora Saiz et al. (<a href="#ref-zamora_saiz_introduction_2020" role="doc-biblioref">2020</a>)</span>.</p>
+<section id="references" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="references"><span class="header-section-number">9.4.1</span> References</h3>
+
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-boehmke_data_2016" class="csl-entry" role="listitem">
+Boehmke, Bradley C. 2016. <em>Data <span>Wrangling</span> with <span>R</span></em>. Use <span>R</span>! Springer. <a href="https://link.springer.com/book/10.1007/978-3-319-45599-0">https://link.springer.com/book/10.1007/978-3-319-45599-0</a>.
+</div>
+<div id="ref-zamora_saiz_introduction_2020" class="csl-entry" role="listitem">
+Zamora Saiz, Alfonso, Carlos Quesada González, Lluís Hurtado Gil, and Diego Mondéjar Ruiz. 2020. <em>An Introduction to Data Analysis in <span>R</span>: Hands-on Coding, Data Mining, Visualization and Statistics from Scratch</em>. <a href="https://link.springer.com/book/10.1007/978-3-030-48997-7">https://link.springer.com/book/10.1007/978-3-030-48997-7</a>.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script>
+document.querySelectorAll("tr.header").forEach(function(row) {
+  const firstTh = row.querySelector("th");
+  if (firstTh && firstTh.textContent.trim() === "") {
+    firstTh.textContent = "Model";
+  }
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./08_Data_Management.html" class="pagination-link" aria-label="Data Management">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Data Management</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./10_Summary_Statistics.html" class="pagination-link" aria-label="Summary Statistics">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Summary Statistics</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
