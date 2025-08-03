@@ -1,0 +1,131 @@
+---
+title: "Discontinuity Designs"
+---
+
+Randomized controlled trials are considered the "gold standard." This means that when possible, a randomized controlled trial can produce plausible and useful causal estimates for the question at hand. However, randomization is not always possible, desirable, or ethical. There are some situations where there is "quasi-randomness." This means that there is an argument that something about the intervention occurred as if it were random. Discontinuity designs are one example of a quasi-random design.
+
+## Defining a Discontinuity
+
+Suppose treatment variable is $D_i$. If $D_i = 1$, then unit $i$ is treated. If $D_i = 0$, then unit $i$ is in the control group. However, in this case, treatment was not randomly assigned. Instead, there is an underlying, continuous variable, $W_i$, that determines $D_i$:
+
+\begin{equation}
+D_i = \begin{cases} 1 & W_i \geq c \\ 0 W_i < c. \end{cases}
+\end{equation}
+
+\noindent Given some threshold $c$, any value of $W_i$ above the threshold implies treatment status and any value below implies control status. This setup allows us to use a regression discontinuity design.
+
+The general idea is that units just below and just above the cutoff are similar, both in observed and unobserved ways. The average treatment effect for units for which $W_i = c$ will provide a good approximation to the treatment effect.
+
+The regression model is:
+
+$$
+Y_i = \beta_0 + \beta_1 D_i + \beta_2 W_i + U_i.
+$${#eq-rdd-simple}
+
+
+\noindent This is sharp RDD because it is deterministic. As long as we know $W_i$ we know with certainty what $D_i$ will be.
+
+The identifying assumption is that units cannot alter $W_i$ with precision around the cut-off. For example, suppose $W_i$ is a test score and the cutoff $c$ determines if a student enters a gifted program. If students can study before the test, take the test multiple times, or appeal to slightly change their score, then the randomness is not as plausible. Students who partake in these "manipulations" may be unobservably different than students who do not.
+
+## Illustration with Simulated Data
+
+Simulate and visualize the data. There is a cutoff at $W = 0$.
+
+```{r, eval = TRUE, fig.alt="Scatterplot of outcome Y against running variable W, showing a sharp jump at W = 0 by treatment status."}
+library(dplyr)
+library(ggplot2)
+
+# Set seed
+set.seed(470500)
+
+# Sample data
+W <-runif(1000, -1, 1)
+Y <- 3 + 2 * W + 10 * (W >= 0) + rnorm(1000)
+
+# Construct the data
+df <- data.frame(Y = Y, W = W) %>%
+  as_tibble()
+
+df <- df %>%
+  mutate(D = ifelse(W >= 0, 1, 0))
+
+# Plot the data
+ggplot(data = df) +
+  geom_point(aes(x = W, y = Y, color = as.factor(D))) +
+  geom_vline(xintercept = 0) +
+  labs(color = "Treatment Status")
+```
+
+The simplest way to estimate the regression is taking Equation @eq-rdd-simple at face value and estimating that. We are interested in the coefficient on $D$. That is, given a value of $W$, the effect of treatment is 10.137 units.
+
+$$
+Y = \alpha + \tau D + \epsilon
+$$
+
+```{r, eval = TRUE}
+rdd <- lm(formula = Y ~ D + W,
+   data = df)
+
+summary(rdd)
+```
+
+This model linearly extrapolates across the threshold. It imposes that both the treatment and control group have the same slope (the coefficient on $W$). Notice that the lines below are parallel so we can believe it, but it is not always the case. In those settings, researchers use other models.
+
+```{r, eval = TRUE, fig.alt="Scatterplot with fitted lines showing a discontinuity in Y at W = 0, by treatment status."}
+ggplot(data = df) +
+  geom_point(aes(x = W, y = Y, color = as.factor(D))) +
+  geom_vline(xintercept = 0) +
+  geom_smooth(aes(x = W, y = Y, group = D), method = "lm", se = FALSE) +
+  labs(color = "Treatment Status")
+
+```
+
+Here is an example with more complex data.
+
+```{r, eval = TRUE, fig.alt="Scatterplot with linear fits showing a sharp jump and differing slopes in Y at W = 0 by treatment status."}
+
+# Set seed
+set.seed(470500)
+
+# Sample data
+W <-runif(1000, -1, 1)
+Y <- 3 + 2 * W + 15 * (W >= 0) + 3 * W^2 + rnorm(1000)
+
+# Construct the data
+df <- data.frame(Y = Y, W = W) %>%
+  as_tibble()
+
+df <- df %>%
+  mutate(D = ifelse(W >= 0, 1, 0))
+
+# Plot the data
+ggplot(data = df) +
+  geom_point(aes(x = W, y = Y, color = as.factor(D))) +
+  geom_vline(xintercept = 0)  +
+  geom_smooth(aes(x = W, y = Y, group = D), method = "lm", se = FALSE) +
+  labs(color = "Treatment Status")
+```
+
+Here it is clear there are different slopes above and below the threshold. We can interact the running variable ($W$) with the treatment variable ($D$).
+
+```{r, eval = TRUE}
+lm(formula = Y ~ D + W:D,
+   data = df) %>% 
+  summary()
+```
+
+Often, researchers add a quadratic term to relax the assumption that the fit is linear.
+
+```{r, eval = TRUE}
+lm(formula = Y ~ D + W:D + I(W^2) + I(W^2):D,
+   data = df) %>% 
+  summary()
+```
+
+## Examples of RDD
+
+See example papers.
+
+## Further Reading
+
+### References

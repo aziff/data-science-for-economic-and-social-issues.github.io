@@ -1,0 +1,151 @@
+---
+title: "Central Limit Theorem"
+---
+
+Unlike previous chapters, this chapter takes you through an activity to practice R syntax and functions yourself. The activity is structured around reviewing the Central Limit Theorem. Feel free to work with a classmate or discuss issues that come up. Create an `.R` script for the activity. Do not worry about formatting the output into a `.Rmd` file as you will not be turning in this work. It is for your own practice!
+
+## Formal Definition of the Central Limit Theorem
+
+There are actually several theorems that relate to the central tendency of sampling distributions. We will focus on the Lindberg-Levy Central Limit Theorem, which is what Wheelan discussed in *Naked Statistics*.
+
+### Statement of the Central Limit Theorem
+
+Suppose there is an independent and identically distributed (i.i.d.) sequence of random variables, $X_1, X_2, X_3, \ldots$. For all $i$ indexing the random variables
+
+\begin{align*}
+\mathbb{E}[X_i] &= \mu \\
+\text{Var}[X_i] &= \sigma^2 < \infty.
+\end{align*}
+
+Then, as $n$ approaches $\infty$, the random variables $\sqrt{n}(\bar{X}_n - \mu)$ converges to a normal distribution with a mean of 0 and a variance of $\sigma^2$, $\mathcal{N}(0 \sigma^2)$.
+
+### Explanation
+
+#### "Random Variable"
+
+Recall that a random variable takes values according to an underlying distribution. For example, if $Y$ is the outcome of a coin flip, the variable can take the values \${$0, 1$}\$ corresponding to heads and tails. The probability of each outcome is 0.5.
+
+#### "Independent and Identically Distributed (i.i.d.)"
+
+This is a common assumption in statistics when dealing with sequences of random variables.
+
+-   If the sequence is **identically distributed** then all the variables have the same distribution. That implies that they have the same mean and variance ($\mu$ and $\sigma^2$ in the formal statement above).
+-   If the sequence is **independent** then none of the random variables are related to each other. Suppose we know that we know that the first coin flip is heads so that $Y_1 = 0$. Does this change the probability that $Y_2$ will be heads? No! The underlying probability distribution remains the same regardless of the realized values of the variables.
+
+#### "As $n$ approaches $\infty$"
+
+The term $n$ refers to the *sample size*. For example, if we flip a coin 10 times, then $n = 10$. In theory, we want to imagine $n$ getting bigger and bigger.
+
+#### "The Random Variables $\sqrt{n}(\bar{X}_n - \mu)$"
+
+We can break this down further
+
+-   $\sqrt{n}$: the square root of the sample size
+-   $\bar{X}_n$: the sample mean for the sample of size $n$. We calculate this by adding up all the values from the sample and dividing by $n$:
+
+\begin{equation*}
+\bar{X}_n = \frac{1}{n} \sum_{j = 1}^n X_j.
+\end{equation*}
+
+-   $\mu$: this is the mean, or expected value, of the underlying distribution. Suppose that the probability density function representing that underlying distribution is $f(X)$. Then, the expected value is formally
+
+\begin{equation*}
+\mathbb{E}[X] = \int_{-\infty}^\infty x f(x) dx.
+\end{equation*}
+
+If the random variable is discrete, then we replace the integral with a sum.
+
+#### "A Normal Distribution with a Mean of 0 and a Variance of $\sigma^2$"
+
+We already went over the mean. Under the same notation, the variance is
+
+\begin{equation*}
+\text{Var}[X] = \int_{-\infty}^\infty x^2 f(x) dx.
+\end{equation*}
+
+The Normal distribution is a particular continuous probability distribution. It has convenient statistical properties, including its role in the Central Limit Theorem! Because of this, it is commonly used across statistics, economics, and other fields. Here are the key facts to remember about the Normal Distribution.
+
+-   The probability density function (PDF) is
+
+\begin{equation*}
+f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp{\left\{\frac{-(x - \mu)^2}{2 \sigma^2}\right\}}.
+\end{equation*}
+
+-   The normal distribution is defined across all real numbers. That means that as the graph extends to $\infty$ and $-\infty$, the PDF is never 0.
+
+## Activity 1: Simulated Data
+
+1.  In this activity, you will be using functions in R that rely on randomness. For example, you will need to draw a vector of random numbers. It is often useful to draw the same vector each time you run your code. At the top of your script, write the following code.
+
+```{r, eval = FALSE}
+set.seed(470500)
+```
+
+Computers generate random numbers using an algorithm that starts at a certain point, or seed. By setting the seed, you are defining where the computer should start the algorithm. Different seeds (try a number other than 470500) will produce different results.
+
+2.  Define a vector called `unif_pop` that contains 1,000,000 draws from the uniform distribution on the interval $[0,1]$. This will the *population*. Below, you will take samples from this population.
+
+3.  Plot a histogram to visualize `unif_pop`.
+
+4.  Recall that the mean and variance of the uniform distribution on the interval $(a, b)$ is $\frac{1}{2} (a + b)$ and the variance is $\frac{1}{12}(b-a)^2$. What is the mean and variance of `unif_pop`?
+
+5.  Now you want to take samples from the population. Look at the manual for the function `sample()`. Try drawing a random sample of size `n=10` from `unif_pop`. Should the argument replace be `TRUE` or `FALSE`?
+
+6.  Take the mean of the sample you drew in question 5. This is the sample mean. In the mathematical notation above, it is $\bar{X}_{10}$ because $n = 10$.
+
+7.  You actually want to take many draws from the population. Write a function that takes as arguments the sample size (10 in the example from question 5) and the population vector (`unif_pop` in the example from question 5). The function should return the sample mean. Test your function for `n=10`.
+
+8.  You will want to call your function from question 7 many times. Output 1,000 instances of the sample means when you sample 10 elements from the population.
+
+a.  Write a loop to call your function 1,000 times.
+b.  [optional, hard!] Use an apply-like function (e.g., `sapply()` or `lapply()`) to call your function 1,000 times. You will need to use the `function(x)` approach from notes 03.
+
+
+9.  You were able to call your function, but how are you saving the output? Save the output to a vector. You may need to define an empty vector of length 0 before your loop. You can use `vector(length = 0)`to do so.
+
+10. What is the mean and standard deviation of the vector from question 9?
+
+11. Plot the histogram of the vector from question 9.
+
+a.  Plot the histogram of the sample means.
+b.  Create a vector of $\sqrt{n}(\bar{X}_n - \mu)$ and plot that histogram. Add the normal distribution over your plot. I put the code below for base and `ggplot2` graphing functions.
+
+```{r, eval = FALSE}
+# Base
+curve(dnorm(x, mean = 0, sd = SD_FROM_4, add = TRUE)
+
+# ggplot2 (remember the plus sign)
+stat_function(fun = dnorm, args = list(mean = 0, sd = SD_FROM_4))
+```
+
+12. Now you want to experiment with different sample sizes. Write a function that takes as arguments:
+
+-   `n`: The size of the sample. Above this was 10.
+-   `population`: The population vector. Above this was `unif_pop`.
+-   `num_samples`: The number of samples to draw. Above this was 1,000. Set the default to be 1,000.
+
+The function should combine the steps in 8 (select either loop or apply-like function) and 9.
+
+The function should sample `n` observations from the population, calculate the sample mean, and save that sample mean to an element in a vector of size `num_samples`. The output of the function should be the vector of the transformed sample means $\sqrt{n}(\bar{X}_n - \mu)$.
+
+13. Run the function from 12 for `n = 2`, `n = 10`, `n = 50`, `n = 100`, and `n = 1000`. You should get 5 vectors from this. Save them to a data frame or a tibble. There should be 1,000 rows corresponding to the number of samples (`num_samples`). There should be 5 columns corresponding to each of the sample sizes.
+
+14. Plot the densities of each of the columns in 13. If you use `ggplot2` you may find it easier to reshape the data to be in long format. The function is `pivot_longer()`.
+
+## Activity 2: Actual Data
+
+15. Now you will visualize the Central Limit Theorem using actual data. Go to Canvas \> Modules \> Data and download `tx_lottery.csv`. Save the data to your computer and open the data in R. Take a moment to get familiar with the data. Each row corresponds to one winning event for the Texas state lottery.
+
+16. Limit the data to only the year 2024.
+
+17. Get key summary statistics for the variable `AmountWon`: mean, median, variance, minimum, and maximum.
+
+18. Plot a histogram or density of variable `AmountWon`. This is your population distribution.
+
+19. Test that the function you wrote for question 12 works for `n=10` with the population `AmountWon`.
+
+20. Repeat questions 13 and 14 for `AmountWon`.
+
+## References
+
+The data on lottery winners come from the [Texas Data Portal](https://data.texas.gov/dataset/Winners-List-of-Texas-Lottery-Prizes/54pj-3dxy/about_data).

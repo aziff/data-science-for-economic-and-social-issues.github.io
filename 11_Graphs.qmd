@@ -1,0 +1,1120 @@
+---
+title: "Data Visualization"
+---
+
+Here are all the libraries you should install for this chapter.
+
+```{r eval = TRUE, warning = FALSE, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(RColorBrewer)
+library(readr)
+library(tidyr)
+library(wesanderson) # Optional
+```
+
+One of R's biggest advantages is its potential for creating informative and high-quality plots. This chapter goes through the built-in functions to produce graphs. Even just these functions allow for a wide variety of types of plots and aesthetic adjustments. Then, this chapter goes through the functions in the package `ggplot2`. These functions add a professional polish to the plots that is harder to achieve with the built-in functions.
+
+## Basic Graphs
+
+### Scatter and Line Plots
+
+The function `plot()` is the most basic plot function. It takes many data structures as inputs, including vectors. If only one vector is specified, it is plotted against an index axis.
+
+```{r, fig.dim = c(5, 4), fig.alt="A simple line plot showing values from 1 to 10 on the y-axis with equal spacing on the x-axis."}
+y <- 1:10
+plot(y)
+```
+
+If two vectors are specified, the first one is the horizontal axis and the second is the vertical axis.
+
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing a positive linear relationship between x values from 11 to 20 and y values from 1 to 10."}
+x <- 11:20
+plot(x, y)
+```
+
+The argument `pch` adjust the symbol. See `?pch` for more information, but the symbols are here for reference. You can also specify the symbol in quotation marks.
+```{r echo = FALSE, fig.align = "center", out.width = "90%", fig.alt="A reference chart showing point shapes for the pch argument in R, labeled from 0 to 25. Shapes include squares, circles, triangles, crosses, diamonds, stars, and filled symbols."}
+knitr::include_graphics("Figures/pch.png")
+```
+
+The argument `cex` adjusts the size of the point. The default is 1. Setting the argument larger than 1 will make it larger while setting the argument less than 1 will make it smaller. Values less than or equal to 0 will result in no points being plotted. The `col` argument adjusts the color of the point. To just get the names of the built-in colors, type `colors()`. [Here](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf) is a reference that lists the names next to the shade.[^graphs-1]
+
+[^graphs-1]: If you want even more flexibility in designing color palettes, refer to [this cheatsheet](https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf) for some ideas of different packages.
+
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing blue star-shaped points along the x-axis from 11 to 20."}
+plot(x, pch = 8, cex = 0.9, col = "blue")
+```
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing medium orchid-colored letter ‘a’ symbols along the x-axis from 11 to 20."}
+plot(x, pch = "a", cex = 1.2, col = "mediumorchid")
+```
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing large pale green diamond-shaped points with dark green borders along the x-axis from 11 to 20."}
+plot(x, pch = 23, bg = "palegreen", col = "palegreen4", cex = 2)
+```
+
+We can change this scatter plot to a line plot by changing the `type` argument. The value `"p"` plots points and is the default; `"l"` plots lines (there are more types listed in the documentation). The argument `lwd` controls with width of the line and works the same as `cex`. The argument `lty` determines the line type. Here are the available types.
+
+```{r echo = FALSE, fig.align = "center", out.width = "90%", fig.alt="A reference chart showing six line types numbered 1 to 6: solid, dashed, dotted, dot-dash, long dash, and two-dash patterns, demonstrating the ‘lty’ argument in R."}
+knitr::include_graphics("Figures/lty.png")
+```
+
+```{r, fig.dim = c(5, 4),fig.alt="A simple line plot showing x values from 11 to 20 connected by a solid line."}
+plot(x, type = "l")
+```
+```{r, fig.dim = c(5, 4),fig.alt="A line plot showing x values from 11 to 20 connected by a slightly thicker dash-dotted line."}
+plot(x, type = "l", lwd = 1.2, lty = 4)
+```
+
+Here are the arguments to define the title, axes, axis labels, and the look of the plot environment. The default axis labels will correspond to the object name. The default limits of the axes will correspond to the values of the object. Changing them simply involves defining a lower and upper limit. The arguments `xaxt = "n"` and `yaxt = "n"` remove the axes. The argument `bty = "n"` removes the box surrounding the plot.
+
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot with a title reading ‘Title’, the x-axis labeled ‘x-axis’, and the y-axis labeled ‘y-axis’."}
+plot(x, main = "Title", xlab = "x-axis", ylab = "y-axis")
+```
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing x values from 11 to 20 with the x-axis limited to the range 0 to 15."}
+plot(x, xlim = c(0, 15))
+```
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing points without any x-axis or y-axis drawn."}
+plot(x, xaxt = "n", yaxt = "n")
+```
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing points with axes but no surrounding box border."}
+plot(x, bty = "n")
+```
+
+There are many other aesthetic elements of `plot()` available in the function's documentation. These basics are sufficient to demonstrate how `plot()` can be used with data. The tibble `txhousing` is one of the built-in datasets in the `ggplot2` package.
+
+```{r}
+head(txhousing)
+df <- as.data.frame(txhousing) # Convert to data frame to use built-in functions smoothly
+```
+
+It is very simple to graph the pairwise scatter plots to get a sense of the pairwise correlations.
+
+```{r, fig.dim = c(5, 4), fig.alt="A pairwise scatter plot matrix showing relationships among sales, volume, and median housing values. Each scatter plot shows the correlation between two variables, with variable names on the diagonal panels."}
+df %>%
+  select(sales, volume, median) %>%
+  plot()
+```
+
+With an actual dataset, we can use the features of `plot()` in a more meaningful way. The function `points()` allows you to layer scatter plots on the active plot.
+
+```{r, fig.dim = c(5, 4), fig.alt="A scatter plot showing median housing prices over time for two cities: purple points represent Houston and red points represent Fort Worth, with median prices generally increasing from 2000 to 2015."}
+plot(df[df$city == "Houston", "date"], 
+     df[df$city == "Houston", "median"],
+     pch = 16, col = "purple", ylim = c(75000, 220000),
+     xlab = "Date", ylab = "Median Price")
+points(df[df$city == "Fort Worth", "date"],
+     df[df$city == "Fort Worth", "median"],
+     pch = 16, col = "red")
+```
+
+The function `lines()` works analogously.
+
+```{r, fig.dim = c(5, 4), fig.alt="A line plot showing median housing prices from 2000 to 2015 for two cities: Houston as a solid line and Fort Worth as a dashed line, both showing an upward trend over time."}
+plot(df[df$city == "Houston", "date"], 
+     df[df$city == "Houston", "median"],
+     type = "l", ylim = c(75000, 220000),
+     xlab = "Date", ylab = "Median Price")
+lines(df[df$city == "Fort Worth", "date"],
+     df[df$city == "Fort Worth", "median"],
+     lty = 5)
+```
+
+### Bar Plots
+
+Bar plots are useful for visualizing categorical data. The built-in data frame `USPersonalExpenditure` is useful for illustration, following chapter 4.1 of @zamora_saiz_introduction_2020.
+
+```{r}
+USPersonalExpenditure
+```
+
+You can plot one column of the data, in this case personal expenditure in 1960. Each bar represents a category of expenditure. The argument `cex.names` controls the size of the labels.
+
+```{r, fig.dim = c(5, 4), fig.alt="A bar chart showing personal expenditures in the US in 1960 by category. The highest spending is on Food and Tobacco, followed by Household Operation, Medical and Health, Personal Care, and Private Education. Bars are colored coral."}
+barplot(USPersonalExpenditure[, 5], 
+        ylab = "Billions USD", cex.names = 0.3,
+        col = "coral2")
+```
+
+Plotting over the whole dataset, the bars are automatically stacked so that now, each bar represents a column (year). The argument `legend.text = TRUE` makes the legend appear. The argument `args.legend` controls the position of the legend and the size of the text.
+
+```{r, fig.dim = c(5, 4), fig.alt="A stacked bar chart showing US personal expenditures from 1940 to 1960 by category. Each bar represents a year and is divided into segments for Food and Tobacco, Household Operation, Medical and Health, Personal Care, and Private Education. A legend at the top left labels each category."}
+barplot(USPersonalExpenditure, legend.text = TRUE,
+        args.legend = c(x = 2, y = 150, cex = 0.5))
+```
+
+To unstack the plot, use the argument `beside = TRUE`.
+
+```{r, fig.dim = c(5, 4), fig.alt="A grouped bar chart showing US personal expenditures from 1940 to 1960 by category. For each year, separate bars represent spending on Food and Tobacco, Household Operation, Medical and Health, Personal Care, and Private Education. A legend at the top left labels each category."}
+barplot(USPersonalExpenditure, legend.text = TRUE,
+        args.legend = c(x = 10, y = 80, cex = 0.5),
+        beside = TRUE)
+```
+
+Dot charts achieve a similar goal as bar plots.
+
+```{r, fig.dim = c(5, 4), fig.alt="A dot chart showing US personal expenditures by category for 1960. Categories on the left from top to bottom are Private Education, Personal Care, Medical and Health, Household Operation, and Food and Tobacco, with Food and Tobacco having the highest spending."}
+dotchart(USPersonalExpenditure[, 5], main = "Personal Expenditure, 1960")
+```
+```{r, fig.dim = c(5, 4), fig.alt="A dot chart showing US personal expenditures by category and year from 1940 to 1960. For each year, five spending categories are listed vertically, with Food and Tobacco showing the highest spending in each year. Triangular points indicate the expenditure values."}
+dotchart(USPersonalExpenditure, cex = 0.5, pch = 2)
+```
+
+### Distributions
+
+Box and whisker plots display the median, inter-quartile range, and outliers. Recall that `df` is a data frame of Texas housing prices.
+
+```{r, fig.dim = c(5, 4), fig.alt="A box-and-whisker plot showing the distribution of median housing sales prices in Texas from 2000 to 2015. Each box represents a year, displaying the median, interquartile range, and outliers, with median prices generally increasing over time."}
+head(df)
+boxplot(df$median ~ df$year, ylab = "Median Sales", xlab = "Year")
+```
+
+The plot can be saved to an object to extract the underlying numbers: the median, quartiles, and end of the whiskers (`stats`), sample size (`n`), outliers (`out`), and the number and names of groups (`group`, `names`).
+
+```{r, fig.dim = c(5, 4), fig.alt="A box-and-whisker plot showing the distribution of median housing sales prices in Texas from 2000 to 2015. Each box represents a year and displays the median, interquartile range, and outliers, with median prices generally increasing over time."}
+boxdf <- boxplot(df$median ~ df$year)
+str(boxdf)
+```
+
+The function `hist()` produces histograms. The default is to plot absolute frequencies (set `freq = FALSE` to plot densities). The breaks are determined by R, but can be specified with the `breaks` argument.
+
+```{r, fig.alt="A histogram showing the distribution of median housing sales prices in Texas. The distribution is right-skewed, with most values between 75,000 and 175,000."}
+hist(df$median, xlab = "Median Sales")
+```
+```{r, fig.alt="A histogram showing the distribution of median housing sales prices in Texas, using narrower bins at 5,000 intervals. The distribution is right-skewed, with most values between 75,000 and 175,000."}
+hist(df$median, xlab = "Median Sales",
+     breaks = seq(50000, 305000, 5000))
+```
+
+Just like with the box and whisker plot, you can save the inputs for the histogram to an object.
+
+```{r, fig.alt="A histogram showing the distribution of median housing sales prices in Texas, divided into 15 bins. The distribution is right-skewed, with most values between about 75,000 and 175,000."}
+dfhist <- hist(df$median, breaks = 15)
+str(dfhist)
+```
+
+### Mathematical Functions
+
+The function `curve()` allows you to plot mathematical functions. This can be done for simple functions.
+
+```{r, fig.dim = c(5, 4), fig.alt="A line plot of the sine function from 0 to 2π, showing one complete wave oscillating between -1 and 1."}
+curve(sin, from = 0, to = 2 * pi)
+```
+
+It can also be used on more complex functions, including those that are user-defined and have more than one argument.
+
+```{r, fig.dim = c(5, 4), fig.alt="A line plot showing two CRRA utility curves for x values from 1 to 3. The upper curve has eta equal to 1.2 and the lower curve has eta equal to 2, both showing increasing but diminishing marginal utility."}
+crra <- function(x, eta) {
+  if (eta == 1) {
+    log(x)
+  } else{
+    (x^(1 - eta) - 1) / (1 - eta)
+  }
+}
+
+curve(crra(x, eta = 1.2), xlim = c(1, 3), type = "l")
+curve(crra(x, eta = 2), add = TRUE)
+```
+
+### Practice Exercises 
+
+1.  Create a plot that has 5 lines for each of the values of $\eta$ in the CRRA utility function: 0, 0.5, 1, 5, and 10.
+
+```{r, eval = FALSE}
+etas <- c(0, 0.5, 1, 5, 10)
+
+for (i in 1:length(etas)) {
+  curve(crra(x, eta = etas[i]), xlim = c(1, 3),  type = "l", add = (i != 1))
+}
+
+
+```
+
+## `ggplot2`
+
+Many separate components are implicit in the graphs created by the built-in functions. These components, such as the axes, come together to form a unified visual representation of the data. The package `ggplot2` makes these different components explicit, providing easy access to more advanced customization for more precise graphs. Even without much customization, the default styles are aesthetically pleasing, or at least more so than the baseline functions resulting from the built-in functions.
+
+### Overview
+
+The approach of `ggplot2` specifies the layers of a plot, providing a "grammar" that can be applied to any situation. Compared to the built-in functions, it is much easier to combine different elements in one graph. All plots contain three main components.[^graphs-2]
+
+[^graphs-2]: The additional components are as follows. (1) Layers create the objects that actually appear on the plot. Layers have five components: data, aesthetic mappings, statistical transformation, geometric object, position adjustment. (2) Statistical transformations (e.g., binning). (3) Scales, including a legend or axes, relate the aesthetics back to the data. (4) Coordinate system relates the data to the plane of the graphic. (5) Faceting allows for the data to be broken into subsets (also called latticing or trellising). (6) Theme relates to the font size, background color.
+
+- Data to visualize
+- Aesthetic mappings relating the data to aesthetics
+- Geometric objects (e.g., lines and points) to represent the data in a layer (**geom**)
+
+In the example below, the data are the built-in `mpg` dataset. The aesthetic mapping is between engine size (`displ`) and highway miles per gallon (`hwy`). The geometric layer consists of points, `geom_point()`. The data are specified in `ggplot()`, the aesthetic mapping in `aes()`, and a layer is added with `+`. This is the basic structure of a `ggplot2` graph.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon. Points show that larger engine sizes are generally associated with lower highway fuel efficiency."}
+ggplot(data = mpg, aes(x = displ, y = hwy)) +
+  geom_point()
+```
+
+To be clear, we can build the plot one component at a time. The below creates a plot with a dataset and default aesthetic mappings. There is no geometric element though.
+
+```{r, fig.dim = c(4, 3), fig.alt="An empty plot with labeled axes for engine displacement and highway miles per gallon, but no data points or lines are shown."}
+ggplot(mpg, aes(displ, hwy))
+```
+
+Adding `geom_point()` adds the geometric element to make a scatter plot. Without specifying anything in `geom_point()`, it inherits the data and aesthetic mappings of `ggplot()`. Note that the variables are typed directly.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon. Points indicate that larger engine sizes are generally associated with lower highway fuel efficiency.”"}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point()
+```
+
+#### Scatter Plots
+
+There are other aesthetic elements besides `x` and `y`, including color, shape, and size. Add the `color` element to the geometric layer, `geom_point()`, to change the color of the geographic elements. Note that this is outside `aes()`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon. Points are colored dark cyan and show that larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(color = "cyan4")
+```
+
+The color can also communicate another dimension of the data. Here, `ggplot2` maps directly from type of car (`class`) to a color scale (described in the legend).
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with points colored by car class. The legend indicates colors for classes such as 2-seater, compact, midsize, minivan, pickup, subcompact, and SUV. The plot shows that larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
+  geom_point()
+```
+
+The variable `class` is a character string and so the scale is discrete. If we use a continuous variable, then the scale changes.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with points colored on a blue gradient by year from 1999 to 2008. The plot shows that larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(x = displ, y = hwy, color = year)) +
+  geom_point()
+```
+
+Shape and size are controlled in similar ways as color. The shapes are the same as for the built-in functions.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon. Points are larger than default size, showing that larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(size = 3)
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon. Points use a hollow circle shape, showing that larger engines generally have lower highway fuel efficiency.”"}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(shape = 21)
+```
+
+You cannot map between a continuous variable and shape. While it is possible to map between a discrete variable and size, it is not advised and R will throw a warning.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon. Points use different shapes to indicate drive type: circles for 4-wheel, triangles for front-wheel, and squares for rear-wheel drive, as shown in the legend."}
+ggplot(mpg, aes(x = displ, y = hwy, shape = drv)) +
+  geom_point()
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon. Point size represents the number of cylinders, with larger points indicating more cylinders, as shown in the size legend. Points are semi-transparent."}
+ggplot(mpg, aes(x = displ, y = hwy, size = cyl)) +
+  geom_point(alpha = 1 / 3) # alpha adjusts the opacity
+```
+
+Adding more layers in `ggplot2` is straightforward. For scatter plots, it may be relevant to add a (curved) line depicting some average. The geom `geom_smooth()` fits a smooth plot to the data, including the standard error.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with a smooth trend line indicating that larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth()
+```
+
+Specify `se = FALSE` to remove the standard error.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with a smooth trend line but no shaded confidence interval. The trend shows that larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+The default smoothing is LOWESS. The argument `scan` controls the distance between a given observation and the smoothed line and must be between 0 and 1. A distance of 1 results in a very smooth curve, while a distance of 0 results in a less smooth curve. With a large dataset, you will need to load the package `mgcv` to fit another smoothing model.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with a smooth trend line that closely follows the data points due to a small span value. The plot shows that larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(span = 0.2)
+```
+
+To fit a linear model, specify `method = "lm"`. Note that the message changes to reflect the fact that a linear model is being fit.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with a straight trend line from a linear regression model"}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Aesthetic elements of the line can be controlled in the `geom_smooth()` geom.
+
+```{r, fig.dim = c(4, 3), fig.alt="Scatter plot showing relationship between engine displacement and highway miles per gallon, with a dark red linear regression line and a semi-transparent bright red shaded confidence interval."}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(method = "lm", 
+              alpha = 0.5, color = "firebrick4", fill = "firebrick1")
+```
+
+#### Practice Exercises 
+
+1.  Correct and simplify the following specifications.
+
+```{r, eval = FALSE}
+# 1
+ggplot(mpg) + 
+  geom_point(aes(mpg$displ, mpg$hwy))
+
+# 2
+ggplot() + 
+  geom_point(mapping = aes(y = hwy, x = cty), data = mpg) +
+  geom_smooth(data = mpg, mapping = aes(cty, hwy))
+
+# 3
+ggplot(diamonds, aes(carat, price)) +
+  geom_point(aes(log(brainwt), log(bodywt)), data = msleep)
+```
+
+2.  If we add an aesthetic to the base layer, it affects all subsequent layers. What is the difference between these three plots?
+
+```{r, eval = FALSE}
+# 1
+ggplot(mpg, aes(x = displ, y = hwy, color = factor(cyl))) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+# 2
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(color = factor(cyl))) +
+  geom_smooth(method = "lm")
+
+# 3
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(aes(color = factor(cyl)), method = "lm")
+```
+
+#### Line Plots
+
+Line plots are created with the geom `geom_line()`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A line plot showing the median duration of unemployment in weeks in the US over time. The line shows fluctuations from the 1960s to the 2010s with periods of increase and decrease."}
+ggplot(economics, aes(date, uempmed)) +
+  geom_line()
+```
+
+In a panel dataset, you will have multiple observations for each individual unit. In this case, it is necessary to specify what is the ID variable. To exemplify, load the `Oxboys` dataset from the `nlme` package (you do not need to have this package installed to access the data).
+
+```{r}
+data(Oxboys, package = "nlme")
+Oxboys <- tibble(Oxboys) # Optional step
+```
+
+Note the difference between these two plots. If there are multiple grouping variables, `aes(group = interaction(var1, var2)` will combine them.
+
+```{r, fig.dim = c(4, 3),fig.alt="A line plot showing boys’ heights against age. All data points are connected by a single line, creating a zig-zag pattern that does not separate individual subjects."}
+ggplot(Oxboys, aes(x = age, y = height)) +
+  geom_line()
+```
+```{r, fig.dim = c(4, 3), fig.alt="A line plot showing boys’ heights against age, with separate lines for each subject. Each line represents an individual boy’s growth trajectory over time."}
+ggplot(Oxboys, aes(x = age, y = height, group = Subject)) +
+  geom_line()
+```
+
+The aesthetic characteristics can be moved to different layers of the plot.
+
+```{r, fig.dim = c(4, 3), fig.alt="A line plot showing boys’ heights against age, with separate lines for each subject. A single straight linear regression line is added across all data, showing the overall trend without a shaded confidence interval."}
+ggplot(Oxboys, aes(x = age, y = height, group = Subject)) +
+  geom_line() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+```{r, fig.dim = c(4, 3), fig.alt="A line plot showing boys’ heights against age, with separate lines for each subject grouped by subject ID. A straight linear regression line shows the overall growth trend, without a confidence interval."}
+ggplot(Oxboys, aes(x = age, y = height)) +
+  geom_line(aes(group = Subject)) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+#### Categorical Data
+
+`geom_bar()` graphs bars that are proportional to the number of units by group.
+
+```{r, fig.dim = c(4, 3), fig.alt="A vertical bar chart showing the count of vehicles for each manufacturer in the dataset. Bars extend upward from the x-axis, with manufacturer names on the x-axis and counts on the y-axis."}
+ggplot(mpg, aes(x = manufacturer)) +
+  geom_bar()
+```
+```{r, fig.dim = c(4, 3), fig.alt="A horizontal bar chart showing the count of vehicles for each manufacturer in the dataset. Bars extend to the right from the y-axis, with manufacturer names on the y-axis and counts on the x-axis."}
+ggplot(mpg, aes(y = manufacturer)) +
+  geom_bar()
+```
+
+Graphing over groups is very intuitive using the `fill` aesthetic as long as the variable supplied is discrete.
+
+```{r, fig.dim = c(4, 3),fig.alt="A vertical bar chart showing the count of vehicles by class, with bars extending upward from the x-axis. Each bar represents the total number of vehicles in a class."}
+ggplot(mpg, aes(class)) +
+  geom_bar()
+```
+```{r, fig.dim = c(4, 3),fig.alt="A horizontal stacked bar chart showing the count of vehicles by class, with segments within each bar colored by drive type (‘drv’). Bars extend to the right, and the legend indicates drive types."}
+ggplot(mpg, aes(y = class, fill = drv)) +
+  geom_bar()
+```
+
+It is possible graph other statistics besides the count.
+
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart showing the mean engine displacement for each drive type. Bars extend upward from the x-axis, with one bar for each drive type showing the average engine size."}
+ggplot(mpg, aes(drv, displ)) +
+  geom_bar(stat = "summary_bin", fun = "mean")
+```
+
+Here is another way to make the same plot as above. `geom_col()` also graphs bars, but the height represents the values in the data. Here, we are calculating the means to be the height of the bars. This approach may be more useful if the statistic to be calculated is more complicated.
+
+```{r, fig.dim = c(4, 3), fig.alt="Showing the mean engine displacement for each drive type. Bars extend upward from the x-axis, with one bar for each drive type showing the average engine size."}
+displ_means <- mpg %>%
+  group_by(drv) %>%
+  summarise(means = mean(displ))
+displ_means
+ggplot(displ_means, aes(x = drv, y = means)) +
+  geom_col()
+```
+
+#### Distributions
+
+Histograms are done with `geom_histogram()`. Frequrency polygons are identical to histograms except with lines instead of bars. These are created with `geom_freqpoly()`. Both use a `binwidth` or `bins` argument to bin the data. The default is 30 bins.
+
+```{r, fig.dim = c(4, 3),fig.alt="A histogram showing the distribution of highway miles per gallon. Bars show the count of vehicles in each bin, with default bin width."}
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram()
+```
+```{r, fig.dim = c(4, 3),fig.alt="A histogram showing the distribution of highway miles per gallon with narrower bins of width 2, providing more detailed intervals of vehicle counts."}
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(binwidth = 2)
+```
+```{r, fig.dim = c(4, 3),fig.alt="A histogram showing the distribution of highway miles per gallon with 40 bins, displaying a more granular breakdown of vehicle counts by fuel efficiency."}
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(bins = 40)
+```
+```{r, fig.dim = c(4, 3),fig.alt="A frequency polygon showing the distribution of highway miles per gallon. A line connects the counts of vehicles in each bin, highlighting the shape of the distribution."}
+ggplot(mpg, aes(x = hwy)) +
+  geom_freqpoly()
+```
+
+Density plots are created with `geom_density()`. See `?density` for options to adjust the kernel. The default is `"gaussian"`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A density plot showing the estimated distribution of highway miles per gallon. A smooth curve indicates the probability density, highlighting where most vehicles’ fuel efficiency values cluster."}
+ggplot(mpg, aes(x = hwy)) +
+  geom_density()
+```
+
+To plot a histogram using the density rather than the number of observations (as is the default), specify that the `y` argument is `..density..`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A histogram showing the distribution of highway miles per gallon with bars scaled to probability density rather than counts. The bin width is 2, providing a detailed view of the fuel efficiency distribution."}
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(aes(y = ..density..), binwidth = 2)
+```
+
+Comparing the distributions across categorical variables can be done by including other aesthetics.
+
+```{r, fig.dim = c(4, 3), fig.alt= "A frequency polygon showing the distribution of highway miles per gallon, with separate colored lines for each drive type. The legend indicates which color corresponds to which drive type"}
+ggplot(mpg, aes(x = hwy, color = drv)) +
+  geom_freqpoly()
+```
+
+```{r, fig.dim = c(4, 3), fig.alt= "frequency polygon showing the distribution of highway miles per gallon, with separate lines for each drive type distinguished by line type. The legend shows which line type corresponds to each drive type"}
+ggplot(mpg, aes(x = hwy, linetype = drv)) +
+  geom_freqpoly()
+```
+
+There are other plot types that can be used to examine the distribution of continuous variables across discrete categories. These are `geom_jitter()`, `geom_boxplot()`, and `geom_violin()`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A jitter plot showing highway miles per gallon for each drive type. Each point represents one vehicle, with horizontal jitter to avoid overlap."}
+ggplot(mpg, aes(x = drv, y = hwy)) +
+  geom_jitter()
+```
+```{r, fig.dim = c(4, 3), fig.alt="A box plot showing the distribution of highway miles per gallon for each drive type. Each box shows the median, interquartile range, and possible outliers."}
+ggplot(mpg, aes(x = drv, y = hwy)) +
+  geom_boxplot()
+```
+```{r, fig.dim = c(4, 3), fig.alt="A violin plot showing the distribution of highway miles per gallon for each drive type. Each shape shows the data’s density and spread."}
+ggplot(mpg, aes(x = drv, y = hwy)) +
+  geom_violin()
+```
+
+The geoms `geom_contour()` and `geom_raster()` allow you to represent 3-dimensional in 2-dimensional plots.
+
+#### Practice Exercises
+
+1.  Inspect the `diamonds` dataset, which is built-in to `ggplot2`. Create a histogram of `carat`. Modify the bins in a way that you think best fits the data.
+2.  How does the density of `price` vary by `clarity`? Create a plot to demonstrate this relationship.
+
+### Modifying the Look of the Plot
+
+#### Axes
+
+The scale of the axes relate the aesthetics back to the data. These two plots are equivalent.
+
+```{r, eval = FALSE}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point(aes(color = class))
+```
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with points colored by car class. A legend indicates the color for each class, such as compact, midsize, SUV, and others. Larger engines generally have lower highway fuel efficiency."}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point(aes(color = class)) +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_color_discrete()
+```
+
+It is possible to override these default scales.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with points colored by car class. The axes are labeled ‘Engine Displacement’ and ‘Highway MPG’. A legend titled ‘Class’ indicates the colors for each car type."}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point(aes(color = class)) +
+  scale_x_continuous("Engine Displacement") +
+  scale_y_continuous("Highway MPG") +
+  scale_colour_brewer("Class")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between engine displacement and highway miles per gallon, with points colored by car class. The highway MPG axis is log-transformed, changing the scale to emphasize differences at lower values."}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point(aes(color = class)) +
+  scale_y_continuous(trans = "log10")
+```
+
+Because naming the axes is such a common step, there is a short cut to easily change the axis labels with `xlab`, `ylab`, and `labs`. See `?plotmath` for a reference on how to add mathematical expressions to the axis labels.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon. Each point represents a vehicle, with semi-transparent points to reduce overplotting. Axes are labeled ‘City Driving (MPG)’ and ‘Highway Driving (MPG)’."}
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  xlab("City Driving (MPG)") +
+  ylab("Highway Driving (MPG)") +
+  geom_point(alpha = 1 / 3)
+```
+```{r, fig.dim= c(4,3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon, with points colored by drive type. Points are semi-transparent to reduce overlap. Axes are labeled ‘City Driving (MPG)’ and ‘Highway Driving (MPG)’, and the legend titled ‘Drive’ shows colors for each drive type."}
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(aes(color = drv), alpha = 1 / 3) +
+  labs(x = "City Driving (MPG)", 
+       y = "Highway Driving (MPG)",
+       color = "Drive") 
+```
+
+These arguments can be set to `NULL` to completely remove them.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon. Each point represents a vehicle, with semi-transparent points to reduce overplotting. The axes have no labels."}
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  xlab(NULL) +
+  ylab(NULL) +
+  geom_point(alpha = 1 / 3)
+```
+
+Breaks and labels are also controlled with the `scale` elements. Here is how breaks and labels can be determined for the axes.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon. Points are semi-transparent to reduce overlap. The x-axis shows breaks every 2 MPG from 8 to 36. The y-axis uses custom labels at 20, 30, and 40 MPG."}
+# Continuous
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(alpha = 1 / 3) +
+  scale_x_continuous(breaks = seq(8, 36, 2)) +
+  scale_y_continuous(breaks = c(20, 30, 40),
+                     labels = c("20 MPG", "30 MPG", "40 MPG"))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart showing mean engine displacement for each drive type. The x-axis labels are customized as ‘4-wheel’, ‘Front-wheel’, and ‘Rear-wheel’ to describe each drive type."}
+# Discrete
+ggplot(mpg, aes(drv, displ))  + 
+  geom_bar(stat = "summary_bin", fun = "mean") +
+  scale_x_discrete(labels = c("4-wheel", "Front-wheel", "Rear-wheel"))
+```
+
+To completely remove breaks and labels, set them to `NULL`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon. Points are semi-transparent to reduce overlap. The x-axis has no tick marks, and the y-axis has no labels."}
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(alpha = 1 / 3) +
+  scale_x_continuous(breaks = NULL) +
+  scale_y_continuous(labels = NULL)
+```
+
+Refer to the `scales` package for additional flexibility in specifying the axis scales and labels.
+
+The arguments `xlim` and `ylim` alter the limits of the axes. Note that data points will be excluded if they fall outside of the limits. These are shortcuts as `limits` is an argument in the `scale` layers.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon. Points are semi-transparent to reduce overlap. The city MPG axis is limited to 10–30, and the highway MPG axis is limited to 20–50."}
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  xlim(c(10, 30)) +
+  ylim(c(20, 50)) +
+  geom_point(alpha = 1 / 3)
+```
+
+```{r, eval = FALSE}
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(alpha = 1 / 3) +
+  scale_x_continuous(limits = c(10, 30)) +
+  scale_y_continuous(limits = c(20, 50)) 
+```
+
+Add `na.rm = TRUE` to suppress the warning message.
+
+```{r, fig.dim = c(4, 3), eval = FALSE}
+ggplot(mpg, aes(x = cty, y = hwy), na.rm = TRUE) + 
+  xlim(c(10, 30)) +
+  ylim(c(20, 50)) +
+  geom_point(alpha = 1 / 3)
+```
+
+The arguments `xlim` and `ylim` can also be used for discrete axes.
+
+```{r, fig.dim = c(4, 3), fig.alt="A jitter plot showing highway miles per gallon for each drive type. Each point represents a vehicle, with points spread horizontally and semi-transparent to reduce overlap."}
+ggplot(mpg, aes(x = drv, y = hwy)) + 
+  geom_jitter(alpha = 1 / 3)
+```
+
+```{r, fig.dim = c(4, 3), fig.alt="A jitter plot showing highway miles per gallon for front-wheel and rear-wheel drive types only. Points are semi-transparent and spread horizontally to reduce overlap. The highway MPG axis is limited to a maximum of 30."}
+ggplot(mpg, aes(x = drv, y = hwy)) + 
+  xlim(c("f", "r")) +
+  ylim(c(NA, 30)) +
+  geom_jitter(alpha = 1 / 3)
+```
+
+#### Color Scales
+
+Continuous scales can be changed with several functions. The `colorbrewer2` colors (included in `ggplot2` and accessible through the `RColorBrewer` package) is useful with some predefined scales, even though the scales are technically designed for maps.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon, with point color indicating engine displacement on a gradient from deep pink for small engines to black for large engines."}
+# Change the color of a continuous scale 
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(aes(color = displ)) +
+  scale_color_gradient(low = "deeppink", high = "black")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon, with point color indicating engine displacement using the ‘RdPu’ ColorBrewer palette, blending shades of red and purple."}
+# Palette from ColorBrewer scales 
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(aes(color = displ)) +
+  scale_color_distiller(palette = "RdPu")
+```
+
+```{r, eval = FALSE}
+# Specify the NA color
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(aes(color = displ)) +
+  scale_color_distiller(palette = "RdPu", na.value = "grey53")
+```
+
+To demonstrate changing the scale of discrete data, we will use this toy plot.
+
+```{r,fig.dim = c(4, 3), fig.alt="A bar chart with four bars labeled ‘a’, ‘b’, ‘c’, and ‘d’. Each bar is a different color, with heights representing values of 3, 4, 1, and 2. Axes have no titles and there is no legend."}
+df <- data.frame(x = c("a", "b", "c", "d"), y = c(3, 4, 1, 2))
+bars <- ggplot(df, aes(x, y, fill = x)) +
+  geom_bar(stat = "identity") + 
+  labs(x = NULL, y = NULL) + 
+  theme(legend.position = "none")
+bars
+```
+
+The `scale_colour_hue()` function picks evenly spaced hues around the color wheel. You can specify the ranges of hues, the chroma, and the luminance. Search "HCL color space" to read more about this system. If colors have the same luninance and chroma, black and white printing will not distinguish the colors.
+
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart with four bars labeled ‘a’, ‘b’, ‘c’, and ‘d’. Each bar is a different color with reduced chroma (color intensity). Heights are the same: 3, 4, 1, and 2. Axes have no titles and no legend."}
+# Adjust the chroma
+bars +
+  scale_fill_hue(c = 40)
+```
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart with four bars labeled ‘a’, ‘b’, ‘c’, and ‘d’. Each bar is a different color, using hues between green and purple. Heights are 3, 4, 1, and 2. Axes have no titles and no legend."}
+# Adjust the hue
+bars +
+  scale_fill_hue(h = c(180, 300))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart with four bars labeled ‘a’, ‘b’, ‘c’, and ‘d’. Each bar is a different pastel color due to increased luminance. Heights are 3, 4, 1, and 2. Axes have no titles and no legend."}
+# Adjust the luminance
+bars +
+  scale_fill_hue(l = 100)
+```
+
+The ColorBrewer palettes can be accessed with `scale_fill_brewer`. Use `display.brewer.all()` to see the available scales.
+
+```{r, fig.dim = c(4, 3), fig.alt="Bar chart: a=3, b=4, c=1, d=2. Color-coded using ColorBrewer Set1"}
+bars +
+  scale_fill_brewer(palette = "Set1")
+```
+```{r, fig.dim = c(4, 3), fig.alt="Display of all ColorBrewer palettes grouped by type.Each row shows a palette with multiple color swatches."}
+bars +
+display.brewer.all()
+```
+
+The `scale_fill_grey()` maps discrete data to a grayscale (great for printing!).
+
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart with four bars labeled ‘a’, ‘b’, ‘c’, and ‘d’. Each bar is shaded in a different shade of grey, from medium grey to near white. Heights are 3, 4, 1, and 2. Axes have no titles and no legend."}
+bars +
+  scale_fill_grey(start = 0.5, end = 1)
+```
+
+You can create your own discrete scale (or find one online) and use `scale_fill_manual`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart with four bars labeled ‘a’, ‘b’, ‘c’, and ‘d’. Each bar is a different manually chosen color: maroon, slate blue, yellow, and plum. Heights are 3, 4, 1, and 2. Axes have no titles and no legend."}
+bars +
+  scale_fill_manual(values = c("maroon3", "slateblue3", "yellow3", "plum3"))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A bar chart with four bars labeled ‘a’, ‘b’, ‘c’, and ‘d’. Each bar is colored using the Wes Anderson ‘Royal1’ palette. Heights are 3, 4, 1, and 2. Axes have no titles and no legend."}
+# Color palettes from Wes Anderson movies
+library(wesanderson)
+bars +
+  scale_fill_manual(values = wes_palette("Royal1"))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing the relationship between city and highway miles per gallon, with points colored by drive type using four manually chosen colors: maroon, slate blue, yellow, and plum. A legend indicates which color corresponds to each drive type."}
+# Manual discrete scale with color instead of fill
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = drv)) +
+  scale_color_manual(values = c("maroon3", "slateblue3", "yellow3", "plum3"))
+```
+
+Generally, bright colors work better for points and lines and pastel colors work better for filling in areas. You should be conscious of how the graph will be viewed (i.e., on a computer screen or printed in black and white) when selecting colors. Finally, many people are color blind. [This article](https://towardsdatascience.com/two-simple-steps-to-create-colorblind-friendly-data-visualizations-2ed781a167ec) provides some options to ensure that your color selections are able to be understood by everyone.
+
+#### Labels
+
+To add text to a plot, `geom_text()` offers many options to specify exactly what you would like to appear.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing 20 vehicles with city and highway miles per gallon. Each point is labeled with the car manufacturer name instead of a point marker"}
+mpg_sample <- slice_sample(mpg, n = 20)
+ggplot(mpg_sample, aes(x = cty, y = hwy)) +
+  geom_text(aes(label = manufacturer))
+```
+
+You can change the font of the labels with the `family` argument. The three fonts that will work on all computers are `"sans"` (default), `"serif"`, and `"mono"`. The argument `fontface` allows you to bold or italicize the text. The options are `"plain"` (default), `"bold"`, and `"italic"`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing 20 vehicles with city and highway miles per gallon. Each point is labeled with the car manufacturer name using a serif font"}
+ggplot(mpg_sample, aes(x = cty, y = hwy)) +
+  geom_text(aes(label = manufacturer), family = "serif")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing 20 vehicles with city and highway miles per gallon. Each point is labeled with the car manufacturer name in bold text"}
+ggplot(mpg_sample, aes(x = cty, y = hwy)) +
+  geom_text(aes(label = manufacturer), fontface = "bold")
+```
+
+The alignment of the text is adjusted with the `hjust` (`"left"`, `"center"`, `"right"`, `"inward"`, `"outward"`) and `vjust` (`"bottom"`, `"middle"`, `"top"`, `"inward"`, `"outward"`) arguments. The `"inward"` options are useful to ensure that the text stays within the limits of the plot.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing 20 vehicles with city and highway miles per gallon. Each point is labeled with the car manufacturer name with text positioned inward toward the point"}
+ggplot(mpg_sample, aes(x = cty, y = hwy)) +
+  geom_text(aes(label = manufacturer), vjust = "inward", hjust = "inward")
+```
+
+The aesthetics `size` and `angle` control the fontsize and font angle of the labels. The `size` aesthetic uses millimeters.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing 20 vehicles with city and highway miles per gallon. Each point is labeled with the car manufacturer name, with smaller text rotated at a 30 degree angle."}
+ggplot(mpg_sample, aes(x = cty, y = hwy)) +
+  geom_text(aes(label = manufacturer), size = 2.5, angle = 30)
+```
+
+Labels make more sense in combination with other geoms. The arguments `nudge_x` and `nudge_y` allow you to specify the spacing between the label and the plot elements. The argument `check_overlap`, if set to `TRUE`, will remove overlapping points, only keeping the first that appear.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing 20 vehicles with city and highway miles per gallon. Each point is marked with a dot and labeled with the car manufacturer name, nudged slightly so text does not cover the point."}
+ggplot(mpg_sample, aes(x = cty, y = hwy)) +
+  geom_point() +
+  geom_text(aes(label = manufacturer), 
+            size = 3, nudge_y = -0.25, nudge_x = 0.25, 
+            hjust = "inward", vjust = "inward")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing 20 vehicles with city and highway miles per gallon. Each point is marked with a dot and labeled with the car manufacturer name, nudged slightly with overlapping labels automatically removed to reduce clutter."}
+ggplot(mpg_sample, aes(x = cty, y = hwy)) +
+  geom_point() +
+  geom_text(aes(label = manufacturer), 
+            size = 3, nudge_y = -0.25, nudge_x = 0.25, hjust = "inward", vjust = "inward", check_overlap = TRUE)
+```
+
+If you have a plot with a busier background (e.g., a heat map), you may want to add labels within a rectangle. See the geom `geom_label()` for this scenario. The package `directlabels` is another extremely useful source for labeling plots.
+
+#### Annotations
+
+Apart from labels, you may want to annotate your plots with notes, descriptions, highlighted areas, etc. These are called metadata and can be treated just as you treat your data. That is, you can use the same geoms for annotation as you would to plot data. The following geoms are particularly helpful for annotation: `geom_text()`, `geom_rect()`, `geom_line()`, `geom_vline()`, `geom_hline()`, and `geom_abline()`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing vehicles with city and highway miles per gallon. A vertical grey line marks city MPG at 20, and a horizontal grey line marks highway MPG at 30. Each point represents one vehicle."}
+ggplot(mpg, aes(x = cty, y = hwy)) +
+  geom_vline(xintercept = 20, color = "grey39") +
+  geom_hline(yintercept = 30, color = "grey39") +
+  geom_point() 
+```
+
+#### Legends
+
+The default creation and formatting of legends is an advantage of `ggplot2`. That is, the formatting relies on the structure of the data and the aesthetic mapping. This is convenient, but can also present difficulties if the data are in a different format than what you would like for the legend.
+
+The legend will only include a layer if it includes some mapped aesthetic with `aes()`. You can remove layers from the legend by setting `show.legend = FALSE` or add layers to the legend by setting `show.legend = TRUE`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing engine displacement and highway miles per gallon. Each point has a large ivory outline circle with a colored inner point indicating drive type. A legend shows the colors for each drive type."}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(pch = 1, color = "ivory4", size = 4) +
+  geom_point(aes(color = drv)) 
+```
+```{r, fig.dim = c(4, 3), fig.alt="Scatter plot showing engine displacement and highway miles per gallon"}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(pch = 1, color = "ivory4", size = 4, show.legend = TRUE) +
+  geom_point(aes(color = drv))
+```
+
+The layout of the legend is determined in the broader `theme`. To change the position, use `legend.position` (`"right"`, `"left"`, `"bottom"`, `"top"`, `"none"`).
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing engine displacement and highway miles per gallon. Points are colored by drive type, and the legend is positioned at the bottom of the plot."}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = drv)) +
+  theme(legend.position = "bottom")
+```
+
+You can also input a coordinate for the legend to appear inside the plot area. The bottom-left corner is (0,0) and the top-right corner is (1,1). The argument `legend.justification` adjusts which corner of the legend is being positioned by `legend.position`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing engine displacement and highway miles per gallon. Points are colored by drive type, and the legend is positioned inside the plot area near the top right."}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = drv)) +
+  theme(legend.position = c(0.8, 0.8))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing engine displacement and highway miles per gallon. Points are colored by drive type, and the legend is positioned inside the plot area near the top right with the legend aligned to its top right corner."}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = drv)) +
+  theme(legend.position = c(0.8, 0.8), 
+        legend.justification = c(1, 1))
+```
+
+Other arguments of `theme()` that control the legend layout are `legend.direction`, `legend.box`, and `legend.box.just`.
+
+The guide functions `guide_colourbar()` (only for continuous scales) and `guide_legend()` provide additional control over the legend. The function `guides()` is a helper function to override the options.
+
+```{r, eval = FALSE}
+# These are all equivalent and plot the default legend
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = displ))
+
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = displ)) +
+  scale_fill_continuous(guide = guide_colourbar())
+
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = displ)) +
+  guides(color = guide_colourbar())
+```
+
+Here are some examples of changes that can be made to discrete scales.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon with points colored by car class. The legend for car class is shown in two columns."}
+# Change the number of columns
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = class)) +
+  guides(color = guide_legend(ncol = 2))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon with points colored by car class. The order of classes in the legend is reversed."}
+# Reverse the order
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = class)) +
+  guides(color = guide_legend(reverse = TRUE))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon with points colored by car class. The legend keys for car class are shown larger than default size."}
+# Specify the size of the legend keys
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = class)) +
+  guides(color = guide_legend(keywidth = 2, keyheight = 2))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing engine displacement and highway miles per gallon with points colored by car class. The plot points are semi-transparent, but the legend shows fully opaque color keys."}
+# Override aesthetic element of plot
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class), alpha = 0.3) +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+```
+
+Here are some examples of changes that can be made to continuous scales.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon with points colored by engine displacement. The color bar for engine displacement is shown in reverse order."}
+# Reverse the order
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = displ)) +
+  guides(color = guide_colorbar(reverse = TRUE))
+```
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon with points colored by engine displacement. The color bar for engine displacement is shown larger than default size."}
+# Change the size of the bar
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = displ)) +
+  guides(color = guide_colorbar(barheight = 7, barwidth = 4))
+```
+
+#### Themes
+
+Themes do not substantively change the plot. Rather, they allow you to customize the plot to match your aesthetic preferences.
+
+We will create this plot for demonstration. It has all of the elements discussed above already formatted.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by the number of cylinders. Points are jittered to reduce overlap, and a thick grey diagonal line indicates equal city and highway mileage. The title is `Mileage by Number of Cylinders`"}
+nice <- ggplot(mpg, aes(cty, hwy, color = factor(cyl))) +
+  geom_jitter() +
+  geom_abline(color = "grey50", size = 2) + 
+  labs(x = "City mileage/gallon",
+       y = "Highway mileage/gallon",
+       color = "Cylinders",
+       title = "Mileage by Number of Cylinders") +
+  scale_color_brewer(palette = "Spectral")
+```
+
+There are complete themes that are built-in or available through packages. Here are all the built-in themes.
+
+```{r, fig.dim = c(3, 2), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a black and white theme with grid lines."}
+nice +
+  theme_bw()
+```
+```{r, fig.dim = c(3, 2), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a linedraw theme with black lines and clear grid."}
+nice +
+  theme_linedraw()
+```
+```{r, fig.dim = c(3, 2), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a light theme with a bright background and grid lines."}
+nice + 
+  theme_light()
+```
+```{r, fig.dim = c(3, 2), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a dark theme with a dark background and light grid lines."}
+nice + 
+  theme_dark()
+```
+```{r, fig.dim = c(3, 2), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a minimal theme with no panel borders and minimal grid lines."}
+nice + 
+  theme_minimal()
+```
+```{r, fig.dim = c(3, 2), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a classic theme with axes and no grid lines."}
+nice + 
+  theme_classic()
+```
+```{r, fig.dim = c(3, 2), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a void theme with no axes, no grid lines, and no background."}
+nice + 
+  theme_void()
+```
+
+Modifying elements of the theme is done with the following format.
+
+```{r, eval = FALSE}
+plot + theme(element.name = element_function())
+```
+
+The function `element_text()` controls how labels and headings appear. The `family`, `face`, `color`, `size`, `hjust`, `vjust`, `angle`, `lineheight`, and margins can all be adjusted in this function.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The title “Mileage by Number of Cylinders” is shown larger and in a khaki color."}
+nice + 
+  theme(plot.title = element_text(size = 18, color = "khaki4"))
+```
+
+Note that any adjustment can be made to any theme.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The plot uses a black and white theme with grid lines. The title “Mileage by Number of Cylinders” is shown larger and in a khaki color"}
+nice + 
+  theme_bw() + 
+  theme(plot.title = element_text(size = 18, color = "khaki4"))
+```
+
+Here is another example adjusting the axis titles as well.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The title “Mileage by Number of Cylinders” is shown larger and in a khaki color. The y-axis title uses a serif font and the x-axis title is italicized."}
+nice + 
+  theme(plot.title = element_text(size = 18, color = "khaki4"),
+        axis.title.y = element_text(family = "serif"),
+        axis.title.x = element_text(face = "italic"))
+```
+
+The function `element_line()` draws lines with `color`, `size`, and `linetype` specified. The grid lines can be adjusted with `panel.grid.major` and `panel.grid.minor`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The major grid lines are shown in navy blue and the minor grid lines are thicker than default."}
+nice +
+  theme(panel.grid.major = element_line(color = "navy"),
+        panel.grid.minor = element_line(size = 2))
+```
+
+The function `element_rect()` draws rectangles with `fill`, `color`, `size`, and `linetype` specified.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage."}
+nice +
+  theme(plot.background = element_rect(color = "lightblue4", size = 2))
+```
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. The panel background behind the plot area is filled with a misty rose color."}
+nice +
+  theme(panel.background = element_rect(fill = "mistyrose"))
+```
+
+To remove elements, use the function `element_blank()`.
+
+```{r, fig.dim = c(4, 3), fig.alt="A scatter plot showing city and highway miles per gallon, with points colored by number of cylinders. A grey diagonal line indicates equal mileage. The legend has no title and the minor grid lines are removed."}
+nice +
+  theme(legend.title = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+#### Practice Exercises
+
+1.  Additional themes are available in the package `ggthemes`. Run the following to see the complete list.
+
+```{r, eval = FALSE}
+ls("package:ggthemes")[grepl("theme_", ls("package:ggthemes"))]
+```
+
+Which theme among the built-in themes and the `ggthemes` is closest to your most-preferred look? Choose one that you will then modify. What would you like to change about the theme?
+
+2.  [Refer to the Themes chapter of Wickham's book](http://link.springer.com/10.1007/978-3-319-24277-4). This chapter lists all the the elements that can be adjusted. Create your theme! Make note of any particularly pleasing (or displeasing) changes along the way.
+
+3.  Define a function with the name of your theme. [This tutorial](https://rpubs.com/mclaire19/ggplot2-custom-themes) explains how to do that towards the end.
+
+### Save
+
+Outside of loops and functions, plots are rendered directly on the screen. You can save them using the `ggsave()` command.
+
+```{r, eval = FALSE}
+ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(alpha = 1 / 3)
+ggsave("Example1.jpg")
+```
+
+Inside a loop or function, you can print the graph first before saving.
+
+```{r, eval = FALSE}
+g <- ggplot(mpg, aes(x = cty, y = hwy)) + 
+  geom_point(alpha = 1 / 3) 
+print(g)
+ggsave("Example2.png")
+```
+
+The available extensions are `.eps`, `.pdf`, `.svg`, `.wmf`, `.png`, `.jpg`, `.bmp`, and `.tiff`.
+
+## 11.a In-Class Activity: Practice with Graphing {.unnumbered}
+
+This activity will help you practice regression in R. Write your code in a `.R` file and upload it to Canvas at the end of class for participation points in today's class. You can write answers to the questions using comments. Do not worry about finishing it, just get as far as you can. You will be graded for completion.
+
+1.  Make sure you have `ggplot2` installed and loaded. Use the functions from that package in all of the below questions.
+
+2.  Download the dataset `GSS2022.dta` to your computer. It is on Canvas \> Modules \> Module 1 \> Datasets. Open the dataset in R using `read_dta()` from the package `haven`.
+
+3.  Make a bar plot of the variable `tax`. Refer to the documentation to learn what this variable means. Make sure you look for the place in the PDF where it lists what the values mean.
+
+4.  Edit your plot from 3 to have labels for the values of `tax`. To do this, you can create a new variable `tax_str` that takes the values "Too High", "About Right", "Too Low". It can be a character variable or a factor variable.
+
+5.  Add these lines to your plot to see how it changes the aesthetics of the plot.
+
+```{r, eval = FALSE}
+  labs(x = "Do you consider the amount of federal income tax you pay as too high, about right, or too low?",
+     y = "Count") +
+  theme_bw() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 14))
+```
+
+6.  Make a bar plot of the variable `partyid`. Look in the documentation to see what that variable means. What is the most common response? Drop observations if partyid is 7 (other party).
+
+7.  Run the below code to see how it changes the aesthetics. Do these aesthetics improve the interpretation of the graph? If you have trouble distinguishing red and blue, the colors go from blue to red as `partyid` goes from 0 to 6.
+
+```{r, eval = FALSE}
+ggplot(gss) + 
+  geom_bar(aes(x = partyid, 
+               fill = as.factor(partyid))) +
+  scale_fill_manual(values = c("#0713F7", "#2615D8", "#4616B9","#65189A", 
+                              "#84197B", "#C31C3D", "#E21E1E")) +
+  labs(x = "Political Party",
+       y = "Count") +
+  theme_bw() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none")
+```
+
+8.  Let's try to graphically answer the following question: Does political party correlate with opinions on the federal income tax?. Create a bar plot that graphs the count of responses to `tax` for each level of `partyid`. Use the argument `position = "dodge"` in `geom_bar()`.
+
+9.  Let's make this even easier to interpret. Create a variable that simplifies the `partyid` variable into two or three parties (Democrat, Independent, Republican). Use your judgement on how to categorize these parties.
+
+10. Make a bar plot of the response to `tax_str` by the variable you created in question 9. The x-axis should be the values of `tax_str` and there should be two or three bars for each value corresponding to the parties.
+
+11. Challenging! By political party calculated in 9, calculate the percent who respond to each value of `tax`. Create a variable. Repeat 10 but use this variable.
+
+This analysis is done in [this paper](http://ricardotruglia.bol.ucla.edu/assets/partisan_divide.pdf)! Check it out if you are interested.
+
+## Further Reading
+
+If you prefer built-in plotting over `ggplot2`, see @rahlf_data_2017. To better understand the "grammar" of `ggplot2`, see @wickham_ggplot2_2016.
+
+### References
+
+

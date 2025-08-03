@@ -1,0 +1,308 @@
+---
+title: "Fixed Effects and Difference-in-Differences"
+---
+
+## Panel Data
+
+Before discussing difference-in-differences, it is important to understand the terminology for data that extends over time.
+
+-   Cross-sectional data. In this type of data, there is one observation per unit. This is the type of data we have been considering in the class so far.
+-   Panel data. In this type of data, there are multiple observations per unit corresponding to multiple time periods. This is the type of data we will consider for difference-in-differences. Another name for panel data is longitudinal data.
+
+Like before, we use $i$ to index the units of the dataset (individuals, households, firms, counties, countries, etc.). Unlike before, we also have to index time periods, $t$. Time periods can be anything: years, seconds, decades, etc. It is convenient to consider there are $N$ individuals, so that $i = 1, 2, \ldots, N$, and $T$ time periods, so that $t = 1, 2, \ldots, T$.
+
+The advantage of panel data is that it allows us to consider a "before and after" something changes. We can then see the effect of a policy intervention by comparing what happens after the intervention to what happens before the intervention.
+
+We can load an example panel dataset from the `AER` package.
+
+```{r, eval = TRUE}
+library(AER)
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+library(tidyr)
+
+data(Fatalities)
+
+# Explore the data (commented to be concise)
+# summary(Fatalities)
+```
+
+This dataset contains the number of deaths from traffic accidents in the continental U.S. annually from 1982 to 1988. Before we dive in, answer the following questions about the data.
+
+1.  What is the unit of analysis in the data?
+2.  What is the unit of time period in the data?
+3.  How many observations and variables are there?
+4.  Is the dataset in long or wide format?
+
+A policymaker might be interested in the relationship between traffic fatalities and taxes on alcohol. We can use this dataset to see the relationship. To begin, let us look at a naive correlation between the fatality rate and the tax on beer.
+
+```{r, eval = TRUE}
+
+# Calculate the fatality rate per 10,000 people
+df <- Fatalities %>%
+  mutate(frate = fatal / pop * 10000)
+
+summary(df$frate)
+
+# Correlation in 1982
+lm(frate ~ beertax, 
+   data = filter(df, year == 1982)) %>% 
+  summary()
+
+
+# Correlation in 1988
+lm(frate ~ beertax, 
+   data = filter(df, year == 1988)) %>% 
+  summary()
+```
+
+Our results are counter-intuitive. It seems that increasing taxes actually increases fatality rate. While this may be the case, we cannot conclude anything causal due to omitted variable biases. We have some covariates in this dataset that my help us control for economic conditions, demographic factors, etc., but we may always be concerned about unobservable factors that determine traffic fatalities, some of which may be related to alcohol taxes. Fixed effects can help us!
+
+## Fixed Effects
+
+We can consider all the observable and unobservable factors of unit that do not vary over time using unit fixed effects. These are just indicator variables for each of the states.
+
+If $Y_{it}$ is the fatality rate for state $i$ in year $t$ and $X_{it}$ is the tax for beer, then we can think of the following regressions for 1982 and 1988 with fixed effects:
+
+\begin{align*}
+Y_{i1982} = \beta_0 + \beta_1X_{i1982} + \beta_2 Z_i + U_{i1982} \\
+Y_{i1988} = \beta_0 + \beta_1X_{i1988} + \beta_2 Z_i + U_{i1988}.
+\end{align*}
+
+Notice that because the fixed effects do not vary over time, if we take the difference of the two equations then the fixed effects will cancel out. This will help us capture the correlation between changes in taxes and changes in traffic fatalities:
+
+\begin{equation*}
+Y_{i1988} - Y_{i1982} = \beta_1(X_{i1988} - X_{i1982}) + (U_{i1988} - U_{i1982})
+\end{equation*}
+
+We can implement this in the data. We allow for an intercept which is the mean change in fatality rate if there were no change in the tax on beer.
+
+```{r, eval = TRUE}
+
+# Reshape data from long to wide
+df_wide <- df %>%
+  pivot_wider(id_cols = state,
+              names_from = year,
+              values_from = c(frate, beertax))
+
+head(df_wide)
+
+# Calculate differences
+df_wide <- df_wide %>%
+  mutate(frate_diff = frate_1988 - frate_1982,
+         beertax_diff = beertax_1988 - beertax_1982)
+
+# Regression
+lm(frate_diff ~ beertax_diff, data = df_wide) %>%
+  summary()
+```
+
+Now we see that when we increase the beer tax, that is correlated with a change in fatality rates. Increasing the tax on a case of beer by one dollar results in 1.04 deaths per 10,000 people on average. We can evaluate the magnitude of this by looking at the summary statistics of the outcome variable and considering the data. This effect seems pretty large. Even with taking the differences to remove the time-invariant, state-level factors, there could be other omitted variables that make the change in beer tax endogenous.
+
+```{r, eval = TRUE, fig.alt="A scatter plot showing the relationship between the change in beer tax and the change in traffic fatality rate between 1982 and 1988. Each point represents a state. A downward-sloping blue linear regression line indicates that increases in beer tax are associated with decreases in fatality rates."}
+ggplot(data = df_wide) +
+  geom_point(aes(x = beertax_diff, y = frate_diff)) +
+  geom_smooth(aes(x = beertax_diff, y = frate_diff), 
+              method = "lm", se = FALSE) +
+  labs(x = "Change in Beer Tax (1988 - 1982)",
+       y = "Change in Fatality Rate (per 10,000, 1988 - 1982)") +
+  theme_bw()
+
+summary(df_wide[c("frate_1982", "frate_1988", "frate_diff")])
+```
+
+We can also consider regressions with the fixed effects without taking the differences between time periods. We call these panel regression models:
+
+\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 X_{it} + \beta_2 Z_i + U_{it}.
+\end{equation*}
+
+Notice that we have the state fixed effects ($Z_i$). You can imagine this regression for each $t$ that we have in the data. The basic idea here is that each state has its own intercept ($\beta_2 Z_i$) in addition to the common intercept ($\beta_0$). The notation above is a bit of a shorthand for including indicators for each of the units except (arbitrarily) the first one:
+
+\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 X_{it} + \alpha_2 D2_i + \alpha_3 D3_i + \ldots + \alpha_N DN_i + U_{it}.
+\end{equation*}
+
+If we remove the common intercept, then we can also include the intercept for the first unit.
+
+Let us estimate the model with traffic fatalities and the beer tax. Notice that we want to use the long data. It is useful to compare with and without intercept. We see the coefficients of the fixed effects, but we are only interested in the estimated coefficient on the beer tax: $-0.657$.
+
+```{r, eval = TRUE}
+# With Intercept
+lm(frate ~ beertax + state, data = df) %>%
+  summary()
+
+# Without Intercept
+lm(frate ~ beertax + state - 1, data = df) %>%
+  summary()
+```
+
+While we can always use `lm()`, we can also use a package called `plm` to more conveniently estimate fixed effect regressions. The model is called "within" because we want there to be unit fixed effects. We get the same result but it does not show all the estimated coefficients for the fixed effects.
+
+```{r, eval = TRUE}
+library(plm)
+
+plm(frate ~ beertax, 
+    data = df,
+    index = c("state", "year"),
+    model = "within") %>%
+  summary()
+
+```
+
+We still may not be satisfied with these estimates! What if there are factors that are changing over time, not just over states? We can include time fixed effects for this. I will use $\delta_t$ to stand in for all the indicators:
+
+\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 X_{it} + \delta_t + U_{it}.
+\end{equation*}
+
+We can run the below regressions because both state and year are factor variables. If they are not factor variables, then we need to convert them before running the regression.
+
+```{r, eval = TRUE}
+
+# State fixed effects
+lm(frate ~ beertax + state - 1, data = df) %>% 
+  summary()
+
+# Time fixed effects
+lm(frate ~ beertax + year - 1, data = df) %>% 
+  summary()
+
+# State fixed effects and time fixed effects
+lm(frate ~ beertax + state + year - 1, data = df) %>% 
+  summary()
+```
+
+For these regressions, we need to be careful with the standard errors. Normally, we assume homoskedasticity, and for longitudinal data, we do not want there to be correlation between the unobserved variables. However, $U_{it}$ will naturally be correlated with $U_{it+1}$ because they are both for the same unit. Similarly, $U_{it}$ will be correlated with $U_{jt}$ because they are both for the same time period.
+
+We can cluster the standard errors to allow for heteroskedasticity and autocorrelated errors within the cluster, but not across clusters. To do, we can use `plm` so that we have a `plm` object rather than an `lm` object. Then, we can use `coeftest()` with the `sandwich` package to calculate the clustered standard errors.
+
+```{r, eval = TRUE}
+library(sandwich)
+
+plm_out <- plm(frate ~ beertax,
+               data = df,
+               index = c("state", "year"),
+               model = "within",
+               effect = "twoways") # This does state and year fixed effects
+
+coeftest(plm_out, vcov = vcovHC, type = "HC1")
+```
+
+## Difference-in-Differences
+
+Now we are comfortable with panel data and fixed effects. In some cases, you may be comfortable assuming that the fixed effects account for all possible unobserved heterogeneity that could be correlated with the covariate of interest (e.g., beer taxes), and interpret the above estimates causally. This is hard to argue though, and there may be something better we can do: difference-in-differences.
+
+Suppose there is a large change in the taxes in Texas but a small change in the taxes in Oklahoma. If we compare Texas to Oklahoma in 1988, we will see the difference between the two states after the policy, but what if this is all due to differences between the states? If we compare Texas in 1982 to Texas in 1988, we may see a difference but what if this is all due to differences between the years? We can take the "difference-in-differences" to account for both possibilities and just see the change due to the policy change. Here are the means for each of the groups before (pre) and after (post) the policy:
+
+\begin{equation*}
+(Y_{\text{Treatment, Post}} - Y_{\text{Treatment, Pre}}) - (Y_{\text{Control, Post}} - Y_{\text{Control, Pre}})
+\end{equation*}
+
+Here is an illustration of the logic from @hanck_introduction_2018.
+
+```{r, eval = TRUE, fig.alt="A line plot illustrating the Differences-in-Differences estimator. It shows mean values for a treatment group and a control group before and after an intervention. The control group mean rises slightly from before to after. The treatment group mean rises more sharply. A dashed line shows the counterfactual trend for the treatment group if there had been no intervention, and a vertical dashed line indicates the DID estimate, the difference between the actual post-treatment mean and the counterfactual."}
+# Source:
+# https://bookdown.org/machar1991/ITER/13-4-quasi-experiments.html
+plot(c(0, 1), c(6, 8), 
+     type = "p",
+     ylim = c(5, 12),
+     xlim = c(-0.3, 1.3),
+     main = "The Differences-in-Differences Estimator",
+     xlab = "Period",
+     ylab = "Y",
+     col = "steelblue",
+     pch = 20,
+     xaxt = "n",
+     yaxt = "n")
+
+axis(1, at = c(0, 1), labels = c("before", "after"))
+axis(2, at = c(0, 13))
+
+# add treatment group
+points(c(0, 1, 1), c(7, 9, 11), 
+       col = "darkred",
+       pch = 20)
+
+# add line segments
+lines(c(0, 1), c(7, 11), col = "darkred")
+lines(c(0, 1), c(6, 8), col = "steelblue")
+lines(c(0, 1), c(7, 9), col = "darkred", lty = 2)
+lines(c(1, 1), c(9, 11), col = "black", lty = 2, lwd = 2)
+
+# add annotations
+text(1, 10, expression(hat(beta)[1]^{DID}), cex = 0.8, pos = 4)
+text(0, 5.5, "s. mean control", cex = 0.8 , pos = 4)
+text(0, 6.8, "s. mean treatment", cex = 0.8 , pos = 4)
+text(1, 7.9, "s. mean control", cex = 0.8 , pos = 4)
+text(1, 11.1, "s. mean treatment", cex = 0.8 , pos = 4)
+```
+
+Let us simulate some data to see how we estimate difference-in-differences.
+
+```{r, eval = TRUE}
+# Source:
+# https://bookdown.org/machar1991/ITER/13-4-quasi-experiments.html
+
+set.seed(470500)
+
+# Sample size
+N <- 200
+
+# Treatment effect
+TEffect <- 4
+
+# Generate treatment dummy
+TDummy <- c(rep(0, N/2), rep(1, N/2))
+
+# Simulate pre- and post-treatment values of the dependent variable
+y_pre <- 7 + rnorm(N)
+y_pre[1:N/2] <- y_pre[1:N/2] - 1
+y_post <- 7 + 2 + TEffect * TDummy + rnorm(N)
+y_post[1:N/2] <- y_post[1:N/2] - 1 
+
+```
+
+We can compute the difference-in-difference estimator by hand.
+
+```{r, eval = TRUE}
+mean(y_post[TDummy == 1]) - mean(y_pre[TDummy == 1]) - 
+(mean(y_post[TDummy == 0]) - mean(y_pre[TDummy == 0]))
+```
+
+We can use a linear model:
+
+\begin{equation*}
+\Delta Y_i = \beta_0 + \beta_1 D_i + U_i.
+\end{equation*}
+
+Notice that we do not need to have everything in a dataset to use `lm()`. We can also rely on standalone vectors.
+
+```{r, eval = TRUE}
+lm(I(y_post - y_pre) ~ TDummy) %>%
+  summary()
+```
+
+We can also use this equation:
+
+\begin{equation*}
+Y_{it} = \beta_0 + \beta_1 D_i + \beta_2 Post_t + \beta (Post_t \times D_i) + U_{it}
+\end{equation*}
+
+```{r, eval = TRUE}
+df <- tibble(Y = c(y_pre, y_post),
+             D = rep(TDummy, 2), 
+             Post = c(rep("1", N), rep("2", N)))
+
+lm(Y ~ D * Post, data = df) %>%
+  summary()
+```
+
+The key assumption is commonly called "parallel trends." This boils down to: in the absence of treatment, the trends of the treatment and the control group would be the same. We can see this most easily in the graph. This means that there cannot be unobserved factors that vary by time and by unit that are correlated with treatment.
+
+## Further Reading
+
+These notes are based on chapters 10 and 13 of @hanck_introduction_2018. See that source for more information.
+
+### References
