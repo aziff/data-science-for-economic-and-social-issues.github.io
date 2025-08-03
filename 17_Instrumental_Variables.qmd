@@ -1,0 +1,215 @@
+---
+title: "Instrumental Variables"
+---
+
+## Problem
+
+## Review of Regression and Assumptions
+
+Let there be $N$ units indexed by $i = 1, 2, \ldots, N$. For example, these could be people, households, firms, states, stocks, etc. For each unit, we observe an outcome variable of interest, $Y_i$, and a regressor $X_i$. We can run the below regression:
+
+\begin{equation}
+Y_i = \beta_0 + \beta_1 X_i + U_i.
+\end{equation}
+
+\noindent Recall that $U_i$ is unobservable and $\beta_0$ and $\beta_1$ are the parameters.
+
+If the following assumptions hold, then we can interpret the model as causal. That is, increasing $X_i$ by one unit causes $Y_i$ to change by $\beta_1$ units.
+
+1.  Linear Model.
+2.  Strict Exogeneity: $\mathbb{E}(U \vert X) = \mathbb{E}(U) = 0$.
+3.  No Perfect Multicollinearity.
+4.  Homoscedasticity.
+
+We saw this interpretation with randomized controlled trials. Suppose that $Y_i$ is income and $X_i$ is an indicator of whether an individual was randomized to attend job training. That is, if $X_i = 1$ then individual $i$ was randomized into the treatment group and attended the job training. If $X_i = 0$, then individual $i$ was randomized into the control group and did not attend the job training. Then $\beta_1$ will be the causal effect of job training on income. Note that in this case, $X_i$ is exogenous under the assumption that randomizing means that not only are the observed variables the same between treatment and control, but also the unobserved factors ($U_i$) are the same between treatment and control.
+
+When exogeneity breaks down, then we cannot interpret the regression causally. There are several reasons why exogeneity may not hold. Regardless of the reason, $\mathbb{E}(U\vert X) \neq \mathbb{E}(U)$.
+
+## Basic Instrumental Variable Setup
+
+Suppose we have the regression model from above:
+
+$$
+Y_i = \beta_0 + \beta_1 X_i + U_i. 
+$${#eq-iv-endogeneous}
+
+
+\noindent We know that $X_i$ is endogeneous, meaning that $\mathbb{E}(U\vert X) \neq \mathbb{E}(U)$. Suppose we observe $Z_i$, which is a valid instrumental variable if the following conditions hold:
+
+1.  Relevance. $X$ and $Z$ are correlated.
+
+2.  Exogeneity. $Z$ cannot be correlated with $U$.
+
+We can check for relevance in the data. That is because $X$ and $Z$ are both observed. We can simply calculate the correlation between them to see that they are related. However, we cannot check for exogeneity. This is an assumption on the unobserved term $U$, so we must rely on logical arguments to justify exogeneity.
+
+### Two-Stage Least Squares Estimator
+
+How do we put into practice the basic instrumental variable setup? We need an estimation strategy. Two-stage least squares (TSLS) is a common approach. There are two stages.
+
+1.  Regress the endogeneous regressor on the instrument:
+
+\begin{equation}
+X_i = \pi_0 + \pi_1 Z_i + V_i.
+\end{equation}
+
+\noindent The unobserved variable $V_i$ is the component of $X_i$ not explained by the instrument. From this regression, we can predict the regressor. That means calculating $\hat{X}_i$ for all units. As long as $Z$ satisfies the two assumptions, then we can interpret $\hat{X}$ as exogeneous to $Y$.
+
+2.  Regress the outcome on the predicted regressor:
+
+\begin{equation}
+Y_i = \alpha_0 + \alpha_1 \hat{X}_i + W_i.
+\end{equation}
+
+Then, $\hat{\alpha}_0$ and $\hat{\alpha}_1$ are the TSLS estimates of $\beta_0$ and $\beta_1$ from Equation @eq-iv-endogeneous.
+
+#### R Implementation
+
+Suppose a policymaker wants to decrease smoking. They suggest increasing taxes on cigarettes to raise the price. In order to know the effect this policy will have on cigarette consumption, we need to know: what is the causal effect of increasing the price of cigarettes on the demand for cigarettes?
+
+Why is this a difficult question to analyze? Demand and supply are determined simultaneously. It is possible that both the demand for cigarettes affects the price, and that the price affects the demand. This general source of endogeneity is called *simultaneity*.
+
+We can use taxes on cigarettes as instruments for the price. Let us evaluate the two assumptions for this instrument.
+
+1.  Relevance. Taxes affect the prices of cigarettes.
+
+2.  Exogeneity. Taxes indirectly affect the demand for cigarettes through prices. However, there are not other plausible channels for how taxes may affect the demand for cigarettes through other channels. This assumption can always be debated, but the argument of exogeneity is that apart from the effect through prices, there is no other effect.
+
+Let us run the analysis in R. We will use data compiled in Stock and Watson (2015). We can do some usual commands to explore the data.
+
+```{r, eval = TRUE}
+
+# Load this package so we can access the data
+library(AER) 
+
+# Load other packages that wil be useful
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+
+# Data on cigarette consumption for the 48 continental US from 1985-1995
+data("CigarettesSW") 
+
+# Number of rows and columns
+dim(CigarettesSW)
+
+# Names of variables
+names(CigarettesSW)
+
+# Summary statistics of all variables
+summary(CigarettesSW)
+```
+
+We want to run this regression:
+
+\begin{equation}
+\log(Q_i) = \beta_0 + \beta_1 \log(P_i) + U_i.
+\end{equation}
+
+\noindent The index $i$ corresponds to states. Here, $Q_i$ is the number of cigarette packs sold per capita and $P_i$ is the average real price (after tax) per pack of cigarettes. The instrument is $S_i$, which is the real price per pack. We are going to focus on one year of data (1995). After exploring the data, the next step is to clean the data for this analysis.
+
+```{r, eval = TRUE}
+
+# Limit to 1995
+cig <- CigarettesSW %>%
+  filter(year == 1995)
+
+# Calculate real prices
+cig <- cig %>%
+  mutate(P = price / cpi, # Real price 
+         S = (taxs - tax) / cpi) # Real sales tax
+
+# Summarize variables we will use in the analysis
+summary(cig[c("P", "S", "packs")])
+```
+
+Now, we can perform the first stage of the TSLS estimator:
+
+\begin{equation}
+\log(P_i) = \pi_0 + \pi_1 S_i + V_i.
+\end{equation}
+
+```{r, eval = TRUE}
+tsls_s1 <- lm(log(P) ~ S,
+              data = cig)
+
+summary(tsls_s1)
+```
+
+The interpretation is that increasing the sales tax by 1 dollar per pack increases the per pack price by 3.07%. This is because the outcome variable is logged. We can use this regression to evaluate the first assumption of the instrument (relevance). All of the below criteria are related, but can be useful to check to understand the first stage.s
+
+-   Significance of the estimated coefficients. We see that the coefficients are significantly different than 0. This means that the relationship between the sales tax and the price is statistically significant.
+-   Magnitude of the estimated coefficients. We determined that there is a statistical significance, but what about an economic significance? We can see this subjectively from the magnitude of the estimated coefficients. Increasing a price by approximately 3% seems like a substantial change in prices. Often this is discussed alongside other estimates or papers. For reference, consider that inflation was 2.9% in 2024.
+-   $R^2$. We can see how much of the observed variation of the price is explained by the sales tax by examining the $R^2$. We find that 47% of the variation is explained.
+
+```{r, eval = TRUE}
+summary(tsls_s1)$r.squared
+```
+
+-   $F$ statistic. The $F$ statistic tells us the overall significance of the model. A common, but arbitrary, rule-of-thumb is that an instrument satisfies the relevance assumption if the $F$ statistic is at least 10.
+
+```{r, eval = TRUE}
+summary(tsls_s1)$fstatistic
+```
+
+We can be satisfied that the instrument is relevant. From the regression, we calculate the fitted values. Note that I add it to the data.
+
+```{r, eval = TRUE}
+cig <- cig %>%
+  mutate(logP_pred = tsls_s1$fitted.values)
+
+```
+
+Then, we use this to run the second stage:
+
+\begin{equation}
+\log(Q_i) = \alpha_0 + \alpha_1 \widehat{log({P}_i)} + W_i
+\end{equation}
+
+```{r, eval = TRUE}
+tsls_s2 <- lm(log(packs) ~ logP_pred,
+              data = cig)
+
+summary(tsls_s2)
+```
+
+The interpretation is that increasing the price per pack of cigarettes by 1% causally reduces cigarette demand by 1.08%. This holds under the assumptions above. If there are other threats to exogeneity, such as omitted variable bias, then these estimates can no longer be interpreted causally.
+
+We can use the variable income to control for the tax policies and general economic condition of states. Let us see how including a covariate changes the process.
+
+```{r, eval = TRUE}
+# Create per capita real income
+cig <- cig %>%
+  mutate(real_inc = (income / population) / cpi)
+
+# First stage
+tsls_X_s1 <- lm(log(P) ~ log(real_inc) + S, data = cig)
+
+summary(tsls_X_s1)
+
+summary(tsls_X_s1)$fstatistic
+summary(tsls_X_s1)$r.squared
+
+
+cig <- cig %>%
+  mutate(logP_X_pred = tsls_X_s1$fitted.values)
+
+
+# Second stage
+tsls_X_s2 <- lm(log(packs) ~ log(real_inc) + logP_X_pred, data = cig)
+summary(tsls_X_s2)
+
+```
+
+The AER package has the function `ivreg`, which is a one-stop function for the above protocol. The first equation is our desired equation. After the midline ($\vert$), put the right-hand side of the first stage. You can see that the output is what we have above from our more manual TSLS approach.
+
+```{r, eval = TRUE}
+ivreg(log(packs) ~ log(P) + log(real_inc) | log(real_inc) + S,
+      data = cig) %>%
+  summary()
+```
+
+## Further Reading
+
+See @stock_introduction_2020 for more details on IV regression. I adapted parts of chapter 12 from @hanck_introduction_2018 for these notes. The example is from @stock_introduction_2020.
+
+### References

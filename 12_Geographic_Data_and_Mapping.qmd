@@ -1,0 +1,648 @@
+---
+title: "Geographic Data and Mapping"
+---
+
+Here are the libraries you will need for this chapter.
+
+```{r, warning = FALSE, message = FALSE}
+# Geographic packages
+library(sf)
+library(spData)
+library(raster)
+#library(tmap)
+
+# Other packages
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+```
+
+## Geographic Data Vocabulary
+
+Geographic datasets have particular features that are useful to understand before using them for analysis and graphing. There are two models of geographic data: the vector data model and the raster data model. The vector data model uses points, lines, and polygons to represent geographic areas. The raster data model uses equally-sized cells to represent geographic areas. Vector data is usually adequate for maps in economics, as it is able to represent human-defined areas precisely. That being said, raster data is needed for some contexts (e.g., environmental studies), and can provide richness and context to maps.
+
+### Vector Data Model
+
+Vector data require a coordinate reference system (CRS). There are many different options for the CRS, with different countries and regions using their own systems. The differences between the different systems include the reference point (where is $(0,0)$ located) and the units of the distances (e.g., km, degrees).
+
+The package `sf` contains functions to handle different types of vector data. The trio of packages `sp`, `rgdal`, and `rgeos` used to be the go-to packages for vector data in R, but have been superseded by `sf`. It has efficiency advantages and the data can be accessed more conveniently than in the other packages. You may still see examples and StackExchange forums with these other packages, however. If needed, the following code can be used to convert an `sf` object to a Spatial object used in the package `sp`, and back to an `sf` object.
+
+```{r, eval = FALSE}
+library(sp)
+example_sp <- as(example, Class = "Spatial")
+example_sf <- st_as_sf(example_sp)
+```
+
+## Manage Geographic Data
+
+Geographic data in R are stored in a data frame (or tibble) with a column for geographic data. These are called spatial data frames (or sf object). This column is called `geom` or `geometry`. Here is an example with the `world` dataset from `spData`.
+
+```{r}
+data("world")
+names(world)
+```
+
+The last variable, `geom`, is a list column. If you inspect the column using `View(world$geom)`, you will see that each element is a list of varying lengths, corresponding to the vector data of the country. It is possible to interact with this sf object as one would a non-geographic tibble or data frame.
+
+```{r, fig.dim = c(4, 3)}
+summary(world)
+attributes(world)
+world
+```
+
+The attributes of `world` show the variable and row names, the name of the `sf` column, the attribute-geometry-relationship (agr), and the information about the object itself (class). Notably, there are some geographic characteristics attached to the data: the geometry type (most commonly, `POINT`, `LINESTRING`, `POLYGON`, `MULTIPOINT`, `MULTILINESTRING`, `MULTIPOLYGON`, `GEOMETRYCOLLECTION`), the dimension, the bbox (limits of the plot), the CRS, and the name of the geographic column.
+
+### Load Spatial Data
+
+As seen above, it is possible to load geographic data built-in to R or other packages using `data()`. There are other packages with more complete data, rather than small examples. For example, the package `osmdata` connects you to the OpenStreetMap API, the package `rnoaa` imports NOAA climate data, and `rWBclimate` imports World Bank data. If you need any geographic data that might be collected by a governmental agency, check to see if there is an R package before downloading it. There may be some efficiency advantages to using the package.
+
+You can also import geographic data into R directly from your computer. These will usually be stored in spatial databases, often with file extensions that one would also use in ArcGIS or a related program. The most popular format is ESRI Shapefile (`.shp`). The function to import data is `st_read()`. To see what types of files can be imported with that function, check `st_drivers()`.
+
+```{r, eval = FALSE}
+sf_drivers <- st_drivers()
+head(sf_drivers)
+```
+
+```{r, message = FALSE, warning = FALSE}
+chi_streets <- st_read("Data/Major_Streets/Major_Streets.shp")
+head(chi_streets[, 1:10], 3)
+```
+
+See `st_write()` to output a shapefile, or other type of spatial data file. The function `saveRDS()` is very useful here as well, as it compresses the files.
+
+### Attribute Data
+
+The non-spatial (or attribute) data can be treated as you would treat any other data frame or tibble. You can use the `tidyverse` or built-in functions to clean, summarize, and otherwise manage the attribute data.
+
+There is are a few details that can prevent frustration.
+
+1.  Both `raster` and `dplyr` have the function `select()`. If you have `raster` loaded, make sure you are specifying `dplyr::select()` when you want the `tidyverse` function.
+
+2.  If you want to drop the spatial element of the dataset, this can be done with `st_drop_geometry()`. If you are not using the data for its spatial elements, you should drop the geometry as it the list column can take up a lot of memory.
+
+```{r}
+world_tib <- st_drop_geometry(world)
+names(world_tib)
+```
+
+### CRS
+
+The CRS can be accessed with an ESPG code (`espg`) or a projection (`proj4string`). The ESPG is usually shorter, but less flexible than the analogous projection. To inspect the CRS of an sf object, use the `st_crs()` function.
+
+```{r, eval = FALSE}
+st_crs(world)
+```
+
+The CRS can either be geographic (i.e., latitude and longitude with degrees) or projected. Many of the functions used for sf objects assume that there is some CRS, and it may be necessary to set one. Operations involving distances depend heavily on the projection, and may not work with geographic CRSs.
+
+```{r}
+london <- tibble(lon = -0.1, lat = 51.5) %>%
+  st_as_sf(coords = c("lon", "lat"))
+st_is_longlat(london) # NA means that there is no set CRS
+```
+
+To set the CRS, use the `st_set_crs()` function.
+
+```{r}
+london <- st_set_crs(london, 4326)
+st_is_longlat(london)
+st_crs(london)
+```
+
+If you are changing the CRS rather than setting one, use the `st_transform()` function. This is necessary when comparing two sf objects with different projections (a common occurrence).
+
+```{r, error = TRUE}
+london_27700 <- st_transform(london, 27700)
+st_distance(london, london_27700)
+```
+
+The most common geographic CRS is **WGS84**, or EPSG code 4326. When in doubt, this may be a good place to start. Selecting a projected CRS requires more context of the specific data. Different sources will use different projections. See chapter 6.3 of @lovelace_geocomputation_2021 and [the EPSG repsitory](https://epsg.org/home.html) for more information on this.
+
+### Spatial Operations
+
+Spatial subsetting involves selecting features based on if they relate to other objects. It is analogous to attribute subsetting. As an example, we will use the New Zealand data.
+
+```{r, fig.alt="Map of New Zealand with regions colored by name, used to illustrate spatial subsetting."}
+# Map of New Zealand and demographic data
+data("nz") 
+names(nz)
+plot(nz[1])
+
+# 101 highest points in new Zealand
+data("nz_height")
+names(nz_height)
+```
+
+Whereas in attribute subsetting, with the general format `x[y, ]`, the `y` would be a logical value, integer, or character string. In spatial subsetting, the `y` is an sf object itself.
+
+```{r}
+ canterbury <- nz %>%
+  filter(Name == "Canterbury")
+
+canterbury_height <- nz_height[canterbury, ]
+```
+
+There are different options for operators for subsetting. Intersects is the default, and is quite general. For example, if the object touches, crosses, or is within, the object will also intersect. Here are some examples of specifying the operator using the `op` argument.
+
+```{r}
+nz_height[canterbury, , op = st_intersects]
+nz_height[canterbury, , op = st_disjoint]
+nz_height[canterbury, , op = st_within]
+nz_height[canterbury, , op = st_touches]
+```
+
+Grouping for creating summary statistics or other calculations can be done using built-in functions (`aggregate`) or `dplyr` functions. In `aggregate`, the `by` argument is the grouping source and the `x` argument is the target output.
+
+```{r, fig.alt="Map of New Zealand showing average elevation by region using a color scale from 2700 to 3000 meters."}
+# Built-in
+nz_avgheight <- aggregate(x = nz_height, by = nz, FUN = mean)
+nz_avgheight
+plot(nz_avgheight["elevation"])
+```
+
+```{r, fig.alt="Map of New Zealand showing average elevation by region, calculated using st_join() and summarise() functions."}
+# dplyr
+nz_avgheight <- nz %>%
+  st_join(nz_height) %>%
+  group_by(Name) %>%
+  summarise(elevation = mean(elevation, na.rm = TRUE))
+plot(nz_avgheight["elevation"])
+```
+
+It is possible to measure the geographic distance between spatial objects using `st_distance()`. Notice that it returns the units!
+
+```{r}
+# Get the highest point in New Zealand
+nz_highest <- nz_height %>%
+  slice_max(order_by = elevation)
+
+# Get the centroid of Canterbury
+canterbury_centroid <- nz %>%
+  filter(Name == "Canterbury") %>%
+  st_centroid()
+
+# Calculate the distance between these two points
+st_distance(nz_highest, canterbury_centroid)
+```
+
+The function `st_distance()` can also be used to calculate distance matrices.
+
+```{r}
+# Get the 3 highest points in New Zealand
+nz_3highest <- nz_height %>%
+  arrange(desc(elevation)) %>%
+  slice_head(n = 3)
+
+# Get the centroids of all states
+all_centroid <- nz %>%
+  st_centroid()
+
+# Calculate the distance matrix with centroids
+st_distance(nz_3highest, all_centroid)
+
+# Without centroids
+st_distance(nz_3highest, nz)
+```
+
+Other geographic measurements include `st_area()` and `st_length()`.
+
+```{r}
+# Area
+nz %>%
+  group_by(Name) %>%
+  st_area()
+
+# Length
+seine %>% 
+  group_by(name) %>%
+  st_length()
+```
+
+### Geometry Operations
+
+The functions in this section interact with the `geom` variable.
+
+The function `st_simplify()` reduces the number of verticies in a spatial object. This results in a "smoothing" of the geography as well as an object that takes up less memory. Use `ms_simplify()` from the `rmapshaper` to avoid spacing issues.
+
+```{r, fig.alt="Map of New Zealand regions used to illustrate geometry simplification in spatial data."}
+plot(nz[1])
+
+```
+
+```{r, fig.alt="simplified map of New Zealand created with a 10 km tolerance to smooth geographic boundaries."}
+plot(st_simplify(nz[1], dTolerance = 10000)) #Smooth by 10 km
+```
+
+We have already seen how to compute the centroid.
+
+```{r, fig.alt="Map of New Zealand regions with markers showing centroids, used to illustrate spatial feature geometry."}
+all_centroid <- st_centroid(nz)
+
+# Plot
+plot(nz[1], reset = FALSE)
+plot(st_geometry(all_centroid), add = TRUE, pch = 3, cex = 1.4)
+```
+
+The function `st_point_on_surface()` alters the point so that a point appears on the parent object. This may be more useful than centroids for labels.
+
+```{r, fig.alt="Map of New Zealand regions with red markers indicating centroids for spatial reference or labeling."}
+nz_ptsonsurface <- st_point_on_surface(nz)
+plot(nz[1], reset = FALSE)
+plot(st_geometry(nz_ptsonsurface), add = TRUE, pch = 3, cex = 1.4, col = "red")
+plot(st_geometry(all_centroid), add = TRUE, pch = 3, cex = 1.4) # Add centroids for comparison
+```
+
+The function `st_buffer()` allows you to compute buffers around geographies. It returns the same sf object, but the geometry column now contains a buffer around the original geometry of the specified distance (in meters).
+
+```{r, fig.alt="Map of New Zealand regions with 5km buffer zones overlaid around elevation points in the West Coast region."}
+nz_height_buff_5km <- st_buffer(nz_height, dist = 5000)
+plot(nz[1], reset = FALSE)
+plot(nz_height_buff_5km[1], add = TRUE)
+```
+```{r, fig.alt="Map of New Zealand regions with 50km buffer zones overlaid around elevation points in multiple areas."}
+nz_height_buff_50km <- st_buffer(nz_height, dist = 50000)
+plot(nz[1], reset = FALSE)
+plot(nz_height_buff_50km[1], add = TRUE)
+```
+
+Affine transformations can be done with spatial data. They should be approached with caution as angles and length are not always preserved even though lines are.
+
+```{r message=FALSE, warning=FALSE}
+nz_g <- st_geometry(nz)
+
+# Shift
+nz_shift <- nz_g + c(0, 100000)
+
+# Scaling around the centroid
+nz_scale <- (nz_g - st_centroid(nz_g)) * 0.5 + st_centroid(nz_g)
+
+# Set the new geography
+nz_changed <- st_set_geometry(nz, nz_shift)
+```
+```{r, fig.alt="Map of New Zealand with original regions and magenta overlays showing geometries shifted northward."}
+plot(nz_g, reset = FALSE)
+plot(nz_shift, col = "magenta", add = TRUE)
+```
+```{r, fig.alt="Map of New Zealand with magenta overlays showing regions scaled toward their centroids."}
+plot(nz_g, reset = FALSE)
+plot(nz_scale, col = "magenta", add = TRUE)
+```
+
+Spatial subsetting with lines or polygons involving changes to the geometry columns is called spatial clipping. Forillustaration, consider two circles created as follows.
+
+```{r, fig.alt="Plot of two overlapping spatial buffers labeled x and y, illustrating geometry operations in spatial analysis."}
+# Create two points and buffers 
+b <- st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) 
+b <- st_buffer(b, dist = 1) 
+x <- b[1]
+y <- b[2]
+
+# Plot
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+```
+
+With these circles, we can see the possible spatial clippings.
+
+```{r, fig.dim = c(4, 3), fig.alt="A diagram showing two overlapping shapes labeled x and y. The overlapping region is filled in steel blue, representing the intersection of x and y."}
+# Intersection
+x_int_y <- st_intersection(x, y)
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+plot(x_int_y, add = TRUE, col = "steelblue")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A diagram showing two overlapping shapes labeled x and y. The part of shape x that does not overlap with y is filled in steel blue, representing the difference of x minus y."}
+# Difference
+x_diff_y <- st_difference(x, y)
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+plot(x_diff_y, add = TRUE, col = "steelblue")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A diagram showing two overlapping shapes labeled x and y. The part of shape y that does not overlap with x is filled in steel blue, representing the difference of y minus x."}
+y_diff_x <- st_difference(y, x)
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+plot(y_diff_x, add = TRUE, col = "steelblue")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A diagram showing two overlapping shapes labeled x and y. The non-overlapping parts of both shapes are filled in steel blue, representing the symmetric difference of x and y."}
+# Both differences
+x_sym_y <- st_sym_difference(x, y)
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+plot(x_sym_y, add = TRUE, col = "steelblue")
+```
+```{r, fig.dim = c(4, 3), fig.alt="A diagram showing two overlapping shapes labeled x and y. The combined area of both shapes is filled in steel blue, representing the union of x and y."}
+# Union
+x_uni_y <- st_union(x, y)
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+plot(x_uni_y, add = TRUE, col = "steelblue")
+```
+
+The function `st_sample()` randomly selects points within an area.
+
+```{r, fig.alt="Two overlapping spatial buffers with randomly sampled points inside, demonstrating spatial sampling."}
+b_sample <- st_sample(b, size = 10)
+plot(b)
+plot(b_sample, add = TRUE)
+```
+
+### Merge
+
+#### Attribute
+
+Suppose you have two datasets with a common identifier variable (e.g., ID, name). It is possible to merge these datasets with this variable following chapter 3, even if there are spatial columns. Here is an example.
+
+```{r, fig.dim = c(4, 3), fig.alt="World map showing 2017 coffee production by country using a color scale from low (blue) to high (yellow)."}
+# Load coffee_data
+data("coffee_data")
+names(coffee_data)
+class(coffee_data)
+
+# Join the world and coffee data
+world_coffee <- full_join(world, coffee_data, by = "name_long")
+
+# Plot coffee production 2017
+plot(world_coffee["coffee_production_2017"])
+```
+
+#### Spatial
+
+If you have two (or more) data sets with spatial elements, it is natural to think about merging them based on spatial concepts. Instead of sharing an identifier variable, they may share geographic space. The function `st_join()` allows for many types of spatial overlays. For example, it is possible to join points to multipolygons.
+
+```{r}
+names(nz)
+names(nz_height)
+
+nz_joined <- st_join(nz, nz_height)
+```
+
+The default is a left join. Inspecting the data reveals that regions with more than one point in `nz_height` appear more than once. The corresponding attribute data from `nz_height` are added to `nz`. The geography type is multipolygon, following the first argument's type. If we switch the order, the geography type changes to point.
+
+```{r}
+nz_joined_rev <- st_join(nz_height, nz)
+```
+
+To do an inner join, set `left = FALSE`. The default operator is `st_intersects()`. To change the operator, change the `join` argument. The [sf cheat sheet](https://github.com/rstudio/cheatsheets/blob/master/sf.pdf) is a great resource to think about spatial overlays and the possible operators.
+
+There may be contexts in which two spatial datasets are related, but do not actually contain overlapping elements. Augmenting the `st_join()` function allows for a buffer distance to create near matches. Here is an example using the `cycle_hire` and `cycle_hire_osm` datasets from the `spData` package.
+
+```{r}
+data("cycle_hire")
+data("cycle_hire_osm")
+any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
+
+# Change the CRS to be able to use meters
+cycle_hire <- cycle_hire %>%
+  st_transform(crs = 27700)
+
+cycle_hire_osm <- cycle_hire_osm %>%
+  st_transform(crs = 27700)
+
+# Join within 20 meters
+cycle_joined <- st_join(cycle_hire, cycle_hire_osm,
+                        join = st_is_within_distance,
+                        dist = 20)
+```
+
+### Practice Exercises 
+
+1.  The below code randomly selects ten points distributed across Earth. Create an object named `random_sf` that merges these random points with the `world` dataset. In which countries did your random points land? (Review: How can you make the below code reproducible?)
+
+```{r}
+# Coordinate bounds of the world
+bb_world <- st_bbox(world)
+
+random_df <- tibble(
+  x = runif(n = 10, min = bb_world[1], max = bb_world[3]),
+  y = runif(n = 10, min = bb_world[2], max = bb_world[4])
+)
+
+# Set coordinates and CRS
+random_points <- random_df %>% 
+  st_as_sf(coords = c("x", "y")) %>% 
+  st_set_crs(4326) 
+```
+
+2.  We saw that 70 of the 101 highest points in New Zealand are in Canterbury. How many points in `nz_height()` are within 100 km of Canterbury?
+3.  Find the geographic centroid of New Zealand. How far is it from the geographic centroid of Canterbury?
+
+## Visualize
+
+The function `plot()` can be used with the `sf` object directly. It relies on the same arguments as for non-geographic data.
+
+```{r, fig.dim = c(4, 3), warning = FALSE, message = FALSE, fig.alt="A map showing country shapes for the entire world."}
+plot(world)
+```
+```{r, fig.dim = c(4, 3), warning = FALSE, message = FALSE, fig.alt="A map showing a subset of country shapes for part of the world."}
+plot(world[3:6])
+```
+```{r, fig.dim = c(4, 3), warning = FALSE, message = FALSE, fig.alt="A map showing world countries with shading indicating each country’s population."}
+plot(world["pop"])
+```
+```{r, fig.dim = c(4, 3), warning = FALSE, message = FALSE, fig.alt="A map showing world country shapes with the continent of Asia highlighted in green as an additional layer."}
+# Example adding layers
+world_asia <- world[world$continent == "Asia", ] %>% st_union()
+plot(world[2], reset = FALSE)
+plot(world_asia, add = TRUE, col = "green")
+```
+```{r, fig.dim = c(4, 3), warning = FALSE, message = FALSE, fig.alt="A map showing countries shaded by continent with dots marking the centroid of each country. The size of each dot represents the country’s population."}
+# More complex example
+plot(world["continent"], reset = FALSE)
+world_centroids <- st_centroid(world, of_largest_polygon = TRUE)
+plot(st_geometry(world_centroids), add = TRUE, cex = sqrt(world$pop) / 10000)
+```
+
+The package `tmap` has the same logic as `ggplot2`, but specialized for maps. There are options for interactive maps as well. The functions of `ggplot2` can also be used with the geom `geom_sf()`.
+
+```{r, fig.alt="A map showing the shapes of regions in New Zealand."}
+ggplot(nz) +
+  geom_sf()
+```
+```{r, fig.alt="A map of New Zealand with each region shaded according to its population."}
+ggplot(nz) +
+  geom_sf(aes(fill = Population)) 
+```
+```{r, fig.alt="A map of New Zealand with region shapes and overlaid points located inside each region. The size of each point represents the region’s population."}
+ggplot() +
+  geom_sf(data = nz) +
+  geom_sf(data = st_geometry(st_point_on_surface(nz)), aes(size = nz$Population))
+```
+
+## Raster Data
+
+Raster data are comprised of equally sized cells and corresponding data values. Because there can only be one value per cell, raster data can be ill-suited to represent human-invented borders. Because of the matrix representation of the geography (rather than coordinate points), raster data is well-suited to efficiently represent continuous spatial data. The package `raster` allows you to load, analyze, and map raster objects.
+
+Printing the example raster displays the raster header and information. This example raster is from Zion National Park in Utah, U.S.. Just as for vector data, the `plot()` function can be used with raster data.To access and set the CRS for raster objects, use `projection()`.
+
+Accessing and managing the attribute data of rasters is different than the usual approaches. For example, variables cannot be character strings. See chapter 3 of @lovelace_geocomputation_2021 for information on this. See chapter 4 for spatial operations on raster data and chapter 5 for geometry operations on raster data.
+
+## Resources
+
+These incredible datasets originally comes from John Snow, but have been digitized and recreated by the [GeoDa Data and Lab](https://geodacenter.github.io/data-and-lab/snow/).
+
+## 12.a In-Class Activity: Spatial Analysis with John Snow {.unnumbered}
+
+Believe it or not, you can use your R tools to recreate Dr.Snow's analysis! In this activity, you will also learn how to use spatial data. For that, you will need the `sf` package.
+
+```{r, eval = TRUE}
+library(ggplot2)
+library(magrittr)
+library(sf)
+```
+
+### Geographic Data Vocabulary
+
+Geographic datasets have particular features that are useful to understand before using them for analysis and graphing. There are two models of geographic data: the vector data model and the raster data model. The vector data model uses points, lines, and polygons to represent geographic areas. The raster data model uses equally-sized cells to represent geographic areas. Vector data is usually adequate for maps in economics, as it is able to represent human-defined areas precisely. That being said, raster data is needed for some contexts (e.g., environmental studies), and can provide richness and context to maps.
+
+#### Vector Data Model
+
+Vector data require a coordinate reference system (CRS). There are many different options for the CRS, with different countries and regions using their own systems. The differences between the different systems include the reference point (where is $(0,0)$ located) and the units of the distances (e.g., km, degrees).
+
+The package `sf` contains functions to handle different types of vector data. The trio of packages `sp`, `rgdal`, and `rgeos` used to be the go-to packages for vector data in R, but have been superseded by `sf`. It has efficiency advantages and the data can be accessed more conveniently than in the other packages. You may still see examples and StackExchange forums with these other packages, however. If needed, the following code can be used to convert an `sf` object to a Spatial object used in the package `sp`, and back to an `sf` object.
+
+```{r, eval = FALSE}
+example_sp <- as(example, Class = "Spatial")
+example_sf <- st_as_sf(example_sp)
+```
+
+### Manage Geographic Data
+
+Geographic data in R are stored in a data frame (or tibble) with a column for geographic data. These are called spatial data frames (or sf object) with a column called `geom` or `geometry`.
+
+#### Load Spatial Data
+
+It is possible to load geographic data built-in to R or other packages using `data()`. For example, the package `osmdata` connects you to the OpenStreetMap API, the package `rnoaa` imports NOAA climate data, and `rWBclimate` imports World Bank data. If you need any geographic data that might be collected by a governmental agency, check to see if there is an R package before downloading it. There may be some efficiency advantages to using the package.
+
+You can also import geographic data into R directly from your computer. These will usually be stored in spatial databases, often with file extensions that one would also use in ArcGIS or a related program. The most popular format is ESRI Shapefile (`.shp`). The function to import data is `st_read()`. To see what types of files can be imported with that function, check `st_drivers()`.
+
+```{r, eval = FALSE}
+sf_drivers <- st_drivers()
+head(sf_drivers)
+```
+
+Download the zip file `Snow.zip` on Canvas \> Modules \> Module 2 \> Data. Unzip the folder and navigate to the directory. Use the function `st_read()` to load the data. Notice that even though there are several file extensions in the folder `snow1`, we use the `.shp` file. This is called a shapefile.
+
+```{r, eval = TRUE}
+deaths_house <- st_read("Data/Snow/snow1/deaths_nd_by_house.shp")
+```
+
+Let us investigate the data. Notably, there are some geographic characteristics attached to the data: the geometry type (most commonly, `POINT`, `LINESTRING`, `POLYGON`, `MULTIPOINT`, `MULTILINESTRING`, `MULTIPOLYGON`, `GEOMETRYCOLLECTION`), the dimension, the bbox (limits of the plot), the CRS, and the name of the geographic column. Notice that the last variable, `geometry`, is a list column. If you inspect the column, you will see that each element is a list of varying lengths, corresponding to the vector data of the country. It is possible to interact with this sf object as one would a non-geographic tibble or data frame.
+
+```{r, eval = TRUE}
+head(deaths_house)
+```
+
+According to the documentation, `deaths` is the total deaths per house. Let us explore this variable like we would for any other dataset.
+
+```{r, eval = TRUE}
+summary(deaths_house)
+```
+
+Combining `ggplot2` and `sf`, we can very easily graph the geographic data.
+
+```{r, eval = TRUE, fig.alt="Map showing spatial features of deaths_house dataset plotted with geom_sf"}
+ggplot(data = deaths_house) +
+  geom_sf()
+```
+
+Now let us use the `aes()` option to understand our variables of interest.
+
+```{r, eval = TRUE, fig.alt="Map showing spatial features of deaths_house dataset with points colored by number of deaths"}
+ggplot(data = deaths_house) +
+  geom_sf(aes(color = as.factor(deaths)))
+```
+
+We can improve this visual by creating a binned variable.
+
+```{r, eval = TRUE, fig.alt="Map showing spatial features of deaths_house dataset with points colored by deaths_bins ranging from 0 to 18 in five color-coded intervals"}
+deaths_house$deaths_bins <- cut(deaths_house$deaths, 
+                                breaks=c(0, 1, 3, 6, 9, 18),
+                                include.lowest = TRUE) 
+
+ggplot(data = deaths_house) +
+  geom_sf(aes(color = deaths_bins), size = 0.8) +
+  scale_color_manual(values = c("grey", "green", "yellow", "orange", "red")) +
+  theme_bw()
+```
+
+We see the houses and the number of deaths by house. But what about the pumps? Let us load that dataset too.
+
+```{r, eval = TRUE}
+pumps <- st_read("Data/Snow/snow6/pumps.shp")
+```
+
+We can do the same data exploration that we always do.
+
+```{r, eval = TRUE}
+summary(pumps)
+```
+
+We can map the data.
+
+```{r, eval = TRUE, fig.alt="Map showing point locations of pumps dataset plotted with geom_sf"}
+ggplot(data = pumps) + 
+  geom_sf()
+```
+
+Here is where we add the spatial analysis that John Snow accomplished. We can super-impose these graphs on top of each other.
+
+```{r, eval = TRUE, fig.alt="Map showing spatial features of deaths_house dataset colored by deaths_bins with pump locations marked and labeled by name"}
+ggplot() +
+  geom_sf(data = deaths_house, aes(color = deaths_bins), size = 0.8) +
+  geom_sf(data = pumps) + 
+  geom_sf_text(data = pumps, aes(label = name), nudge_y = -20, size = 3) +
+  scale_color_manual(values = c("grey", "green", "yellow", "orange", "red")) +
+  theme_bw()
+
+```
+
+That was John Snow's seminal map. Now, let us look at the other data he collected from the rest of London to further corroborate his theory.
+
+```{r, eval = TRUE}
+sds <- st_read("Data/Snow/snow8/subdistricts.shp")
+summary(sds) 
+```
+
+We can make the map without thinking about any of the variables. Notice that now the type of geometry is MULTIPOLYGON rather than POINT.
+
+```{r, eval = TRUE, fig.alt="Map showing boundaries of spatial units in sds dataset plotted with geom_sf"}
+ggplot(data = sds) +
+  geom_sf() +
+  theme_bw()
+```
+
+We can color in these areas by the proportion that was served by Southwark & Vauxhall.
+
+```{r, eval = TRUE, fig.alt="Map showing spatial units in sds dataset filled by perc_sou variable with a blue color scale"}
+ggplot(data = sds) +
+  geom_sf(aes(fill = perc_sou)) +
+  theme_bw()
+```
+
+We can also look at the death rate in 1849 (before Lambeth changed the location of its pipes).
+
+```{r, eval = TRUE, fig.alt="Map showing spatial units in sds dataset filled by rate1849 variable with a blue color scale"}
+ggplot(data = sds) +
+  geom_sf(aes(fill = rate1849)) +
+  theme_bw()
+```
+
+And in 1854, the rate is concentrated in a more specific way.
+
+```{r, eval = TRUE, fig.alt="Map showing spatial units in sds dataset filled by rate1854 variable with a blue color scale"}
+ggplot(data = sds) +
+  geom_sf(aes(fill = rate1854)) +
+  theme_bw()
+```
+
+Now, go to your quiz to think about how we can use modern econometric tools (e.g, IV, difference-in-differences) to analyze these data.
+
+
+## Further Reading
+
+The above information comes from @lovelace_geocomputation_2021 and @wickham_ggplot2_2016.
+
+### References
+

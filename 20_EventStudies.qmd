@@ -1,0 +1,146 @@
+---
+title: "Event Studies"
+---
+
+For this chapter, download the following libraries.
+
+```{r, eval = TRUE}
+library(tidyverse)
+library(fixest)
+library(wooldridge)
+```
+
+In the examples of difference-in-differences that we saw before, we compared outcomes before and after a treatment for treatment and control groups. The treatment group all started experiencing the treatment at the same time. Event studies is the name for the approach when treated units receive treatment at different times.Event studies estimate dynamic treatment effects by comparing outcomes relative to the timing of the event.
+
+## Notation
+
+We define **event time** as the number of periods before or after treatment:
+
+\begin{equation}
+Y_{it} = \sum_{k \neq -1} \beta_k \cdot \mathbb{1}\{ \text{event\_time}_{it} = k \} + \alpha_i + \gamma t + \varepsilon_{it}
+\end{equation}
+
+-   The reference period is ( k = -1 ), the period just before treatment.
+-   $\alpha_i$: individual fixed effects
+-   $\gamma_t$: time fixed effects
+
+Each $\beta_k$ tells us the average difference in the outcome $k$ periods before or after treatment, relative to the omitted period ($k = -1$).
+
+### Event Study in Practice: Union Entry and Wages
+
+We'll use the `wagepan` dataset from the `wooldridge` package. This dataset tracks 545 men from 1980 to 1987, recording their wages and union status each year.
+
+```{r load-data}
+data(wagepan)
+head(wagepan)
+```
+
+We define the "event" as the first year a person joins a union.
+
+```{r create-event-time}
+# Identify first year of union membership
+first_union <- wagepan %>%
+  group_by(nr) %>%
+  filter(union == 1) %>%
+  summarise(first_union_year = min(year), .groups = "drop")
+
+# Merge with main data and compute event time
+wagepan_evt <- wagepan %>%
+  left_join(first_union, by = "nr") %>%
+  mutate(event_time = ifelse(!is.na(first_union_year), year - first_union_year, NA))
+```
+
+We'll keep only individuals who ever joined a union to estimate dynamic effects.
+
+```{r subset-treated}
+wage_evt <- wagepan_evt %>%
+  filter(!is.na(event_time))
+```
+
+### Estimate the Event Study Model
+
+We'll use `fixest::feols()` to estimate the event study, including individual and year fixed effects.
+
+```{r estimate-model}
+event_model <- feols(lwage ~ i(event_time, ref = -1) | nr + year, data = wage_evt)
+summary(event_model)
+```
+
+### Plot the Event Study
+
+```{r plot-model, fig.alt="“Event study plot showing estimates and 95 percent confidence intervals for the effect of union entry on log wages over event time, with a vertical dashed line at time zero"}
+iplot(event_model, ci = TRUE, ref.line = 0, main = "Event Study: Union Entry and Log Wages")
+```
+
+### Interpreting the Plot
+
+-   **Pre-trends**: Are the coefficients before treatment close to zero? This supports the parallel trends assumption.
+-   **Post-treatment effects**: Do wages rise or fall after joining a union?
+-   **Statistical significance**: Look at the confidence intervals.
+
+Event studies are a powerful tool for visualizing causal effects over time—but only if the identifying assumptions hold!
+
+### Resources
+
+I closely followed [Tilburg Science Hub](https://tilburgsciencehub.com/topics/analyze/causal-inference/panel-data/event_studies/) for this exercise, which is based on the [original paper](https://www.sciencedirect.com/science/article/pii/S0095069623001171?dgcid=SSRN_redirect_SD&ssrnid=4569587).
+
+## Activity: Event Studies
+
+1.  Read the first two pages of the paper "Punishment to promote prosocial behavior: a field experiment" posted to Canvas \> Modules \> Module 2 \> `VS2024.pdf`. Summarize in a few sentences the idea behind the experiment in that paper.
+
+2.  Go to Canvas. Download `waste.dta` from Modules \> Module 2 \> Datasets. Save the dataset to a convenient folder and open it in your script.
+
+3.  Explore the data. Get a sense for the units of analysis, the variables, whether the data are wide or long, and how many units are in the treatment and control groups. We are interested in the otucome `residual_weight`, which measures the amount of garbage. For a given route, the variable `treatment` "turns on" (that is, goes from 0 to 1) when the households on the route receive the announcement of the inspections.
+
+4.  We want to create a variable called `weekstart` that contains the value of `calendar_week` for which a particular route went from 0 to 1. Create this variable. This is tricky! Hint: Think about first constructing a variable that is like `calendar_week` but for all rows when `treatment` is 0, it takes a very large value. Then, create `weekstart` by taking the minimum of that variable.
+
+5.  Create a variable called `eventtime` that is centered (i.e., 0) around when treatment begins, by route. It should be 0 one period before treatment begins (the variable `treatment` goes from 0 to 1).
+
+6.  Graph the variable `eventtime`. You can use the below code. Notice that we observe many observations between -20 and 20, but there are some observations observed beyond those periods. This can pose an issue because we want to have enough data at each of our event times to be able to estimate the regression well.
+
+```{r, eval = FALSE}
+ggplot(data = waste) + 
+  geom_bar(aes(x=eventtime)) + 
+  labs(x = "Event Time", y = "Count") +
+  theme_bw()
+```
+
+7.  Bin event time. You can use `cut` or `ifelse`. Create a bin for values less than or equal to -37. Create a bin for greater than or equal to 28. Everything else should remain as it is. That is, the values should be: -37, -36, -35, ..., 26, 27, 28. Once you create the variable, turn it into a factor and use `relevel` to change the reference point to `0`. We want to do this because we want to exclude 0 from the regression below. That is, we want all estimated values relative to the value at event time 0.
+
+8.  You should estimate this equation:
+
+\begin{equation*}
+Y_{it} = \beta_0 + \sum_{\tau = -37}^{-1} \alpha_\tau W_{i\tau} + \sum_{\tau=1}^{28} \alpha_\tau W_{i\tau} + \lambda_i + \mu_t + \varepsilon_{it}.
+\end{equation*}
+
+-   $Y_{it}$: this is the outcome variable and should be `residual_weight`
+-   $\tau$: event time, at $\tau = 1$, treatment begins
+-   $W_{i\tau}$: indicator that is 1 if route $i$ has event time $\tau$
+-   $\lambda_i$: unit fixed effects
+-   $\mu_t$: time fixed effects
+
+To do this, use your usual `lm()`. The right hand side should include `eventtime_bin`, unit, and time fixed effects.
+
+9.  Look at your estimates for `eventtime_bin`. What do you notice about the estimates as the event time goes from negative to positive?
+
+10. This is going to be way more striking as a plot. Use the below code to extract the coefficients from the regression into a manageable dataset. There are complex data operations here that we have not learned about in class. If you are interested, try to figure out what each line does. Note that you need the tibble and stringr packages. The object `regout` is the object from summarizing the output of question 8. Using the critical value 1.96, create two variables in this dataset that take the lower and upper values of the 95% confidence interval.
+
+```{r, eval = FALSE}
+library(tibble)
+library(stringr)
+
+regout <- output$coefficients[str_detect(rownames(output$coefficients), "eventtime_bin"),] %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "var") %>%
+  as_tibble() %>%
+  mutate(eventtime = str_extract(var, "-??[:digit:]{1,2}?$"),
+         eventtime = as.numeric(eventtime))
+
+names(regout) <- c("varname", "estimate", "stderror", "tvalue", "pvalue", "eventtime")
+
+```
+
+11. Create a plot with event time as the horizontal axis and the estimated coefficient as the vertical axis. There should be a point for every estimate at each event time. Use `geom_errorbar()` to add the 95% confidence intervalus. Note that in aesthetics you will need to specify `x` as event time, `ymin` (the minimum y value) and `ymax` (the maximum y value). You can go to the help for that function and scroll to the bottom to see examples.
+
+12. What is your takeaway about the effectiveness of this type of intervention to induce people to separate their trash and recycling?
+

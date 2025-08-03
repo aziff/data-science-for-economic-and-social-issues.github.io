@@ -1,0 +1,373 @@
+---
+title: "Regression"
+---
+
+Regression is a powerful tool to investigate the dependence of one variable on another @casella_statistical_2002. In this chapter, we will review linear regression, its common pitfalls, and some useful non-linear specifications (logit and probit).
+
+## Regression
+
+In the population, suppose there are three random variables $X$, $U$, and $Y$. Because they are radnom variables, they have some underlying probability distributions and may have a statistical relationship. Generally, we may think of $Y$ as a function of $X$ and $U$:
+
+\begin{equation*}
+Y = f(X, U).
+\end{equation*}
+
+We are not saying that $X$ and $U$ cause $Y$ or anything like that. All we are saying is that we think there is a way to write $Y$ as depending on the values that $X$ and $U$ take. In practice, having a general function $f()$ makes the problem harder. We can assume that the function is linear. Even if it is not actually linear, a linear function is often an adequate approximation.
+
+Suppose we have a sample of size $N$ units, indexed by $i$. That is, $i = 1, 2, 3, \ldots, N$. Each unit $i$ has a realization of the random variables: $Y_i$, $X_i$, and $U_i$. Suppose that $U$ is unobservable. That means that our dataset contains $(X_1, X_2, \ldots, X_N)$ and $(Y_1, Y_2, \ldots, Y_N)$. We can set up the linear regression as
+
+\begin{equation*}
+Y = \beta_0 + \beta_1 X + U.
+\end{equation*}
+
+Note that $U$ is unobserved so it does not matter if it has a coefficient attached to it. It is common to assume that $\mathbb{E}(U) = 0$. Even if this were not the case, the intercept $\beta_0$ can be rescaled to accommodate it. Then, the interpretation is that the expected value of $Y$ given the value of $X = x$ is:
+
+\begin{equation*}
+\mathbb{E}(Y \vert X = x) = \beta_0 + \beta_1 x.
+\end{equation*}
+
+The estimation of $\beta_0$ and $\beta_1$ can be done using Ordinary Least Squares (OLS). Let us use R for this. We will use data from the General Social Survey (GSS) available on Canvas for download. Suppose we are interested of the relationship between education and income.
+
+```{r, eval = TRUE}
+library(dplyr)
+library(haven)
+library(magrittr)
+
+# Remember to set your working directory first
+#setwd("Your/Working/Directory/Here")
+gss <- read_dta("Data/Regression/GSS2022.dta")
+
+# Summarize education and income
+gss %>%
+  select(educ, conrinc) %>%
+  summary()
+```
+
+While it would work to write out the expressions for the OLS estimator explicitly in R, it is practical to use a function for linear regression. The built-in function `lm()` is great. Note that it uses the formula specification where `~` means equals. Given that we specify the data, we should not reference variables using `gss$conrinc` or similar subsetting methods. Note that it automatically estimates a regression with an intercept.
+
+```{r, eval = TRUE}
+lm(formula = conrinc ~ educ,
+   data = gss)
+```
+
+If you want to estimate the regression without the intercept, subtract 1 or add 0.
+
+```{r, eval = TRUE}
+lm(formula = conrinc ~ educ - 1,
+   data = gss)
+
+lm(formula = conrinc ~ educ + 0,
+   data = gss)
+```
+
+While the print out of this command is useful to get the broad strokes the regression, there is a lot more information hidden in the object that `lm()` returns. Assign the output to an object in the environment to see it. That way you can access elements of it as a list.
+
+```{r, eval = TRUE}
+out <- lm(formula = conrinc ~ educ,
+          data = gss)
+
+#str(out)
+names(out)
+```
+
+These elements may be particularly useful.
+
+-   `coefficients`. This vector contains the estimated coefficients.
+-   `residuals`. For each unit, the residual is $Y_i - \hat{Y}_i$. In this example, that is $Y_i - \hat{\beta}_0 + \hat{\beta}_1 X_i$.
+-   `fitted.values`. For each unit, $\hat{Y}_i$.
+-   `df.residual`. Residual degrees of freedom. This is the number of units minus the number of coefficients.
+-   `na.action`. Information about `NA` values and how they were handled.
+-   `xlevels`. If the variables are factors, then information about the levels.
+
+We can take this a step furhter using `summary()`. This is a more convenient output.
+
+```{r, eval = TRUE}
+summary(out)
+
+out_summary <- summary(out)
+
+#str(out_summary)
+names(out_summary)
+```
+
+Notice that the object from `summary()` has other elements. These elements may be particularly useful.
+
+-   `coefficients`. Note that this looks different and has more information than `out$coefficients`. It also contains the standard errors, $t$-statistics (the estimated coefficient divided by the standard error), and the two-sided $p$-value testing if the coefficient is different than 0.
+-   `sigma`. Mean square error where $p$ is the number of coefficients: $\frac{1}{n - p} \sum_{i}^n Y_i - \hat{Y}_i$.
+-   `df`. A vector with three numbers: the total number of coefficients from covariates that are not linearly dependent $(p)$, the number of observations minus this $(n-p)$, and the total number of coefficients includign those that are linearly dependent. Note that you want the first and last numbers to be the same. Otherwise, you are specifying a linear regression with multicollinearity.
+-   `r.squared`. If there is an intercept, it can be intuitively understood as the fraction of variance that the model explains. The formula is $1 - \frac{\frac{1}{n - p} \sum_{i}^n Y_i - \hat{Y}_i}{\sum_i^n (Y_i - \bar{Y})^2}$.
+-   `adj.r.squared`. This $R^2$ is the same idea but it penalizes additional covariates.
+-   `fstatistic`. A vector with three numbers: the $F$-statistic and its degrees of freedom.
+
+Now that we are comfortable with the basics of `lm()`, let us explore adding more variables and using other specifications. To add variables, use `+`.
+
+```{r, eval = TRUE}
+# Create a variable for experience
+gss <- gss %>%
+  mutate(exp = age - (educ + 5))
+
+lm(formula = conrinc ~ educ + exp,
+          data = gss) %>%
+  summary()
+```
+
+The classic Mincer equation regresses the log of the wage on education, experience, and experience squared. We can do these mathematical transformations within the formula call. It can also be done by creating a new variable or transforming the existing variable in the dataset. Just be mindful of the values. For example, given we are taking the log of income, we should check that there are no incomes less than or equal to zero. The function `I()` ensures that the formula interprets the expression as mathematical (i.e., squared) rather than an expression for the formula.
+
+```{r, eval = TRUE}
+lm(formula = log(conrinc) ~ educ + exp + I(exp^2),
+          data = gss) %>%
+  summary()
+```
+
+Also remember that linear regression means linear in the coefficients. That means that it is fine to have non-linear functions of the covariates like we do for experience squared. These are all continuous variables. It is common to want to include dummies. It does not matter if the variable is numeric (0 or 1) or logical (TRUE or FALSE).
+
+```{r, eval = TRUE}
+
+lm(formula = log(conrinc) ~ educ + exp + I(exp^2) + sex,
+          data = gss) %>%
+  summary()
+
+```
+
+Let us add a categorical variable that takes more than two values (not an indicator). Notice that the values of race are 1, 2, 3, and `NA` corresponding to white, black, other, and missing. If we incldue the variable as-is in the regression, interpretation will be difficult. An easy fix is to transform it to a factor variable.
+
+```{r, eval = TRUE}
+table(gss$race, useNA = "always")
+
+lm(formula = log(conrinc) ~ educ + exp + I(exp^2) + sex + race,
+          data = gss) %>%
+  summary()
+
+# Transformed to a factor variable
+lm(formula = log(conrinc) ~ educ + exp + I(exp^2) + sex + as.factor(race),
+          data = gss) %>%
+  summary()
+
+# More careful transformation to a factor variable
+gss <- gss %>%
+  mutate(race_factor = factor(race, labels = c("WHITE", "BLACK", "OTHER")))
+
+# Note that it automatically omits the first level of the factor, in this case WHITE
+
+# Use relevel to set a different reference
+gss <- gss %>%
+  mutate(race_factor = relevel(race_factor, ref = "BLACK"))
+
+lm(formula = log(conrinc) ~ educ + exp + I(exp^2) + sex + race_factor,
+          data = gss) %>%
+  summary()
+
+```
+
+Interactions can be added with `*` or `:`. Note the difference below.
+
+```{r, eval = TRUE}
+
+lm(formula = log(conrinc) ~ sex*educ + exp + I(exp^2) + race_factor,
+          data = gss) %>%
+  summary()
+
+
+lm(formula = log(conrinc) ~ sex:educ + exp + I(exp^2) + race_factor,
+          data = gss) %>%
+  summary()
+```
+
+### Interpretation of Linear and Non-Linear Specifications
+
+The interpretation of the coefficients depends on the specification. I go through common specifications below.
+
+-   Linear. $Y = \beta_0 + \beta_1 X + U$. Increasing $X$ by one unit changes $Y$ by $\hat{\beta}_1$ units on average.
+
+-   Log-Linear. $\ln(Y) = \beta_0 + \beta_1 X+ U$. Increasing $X$ by one unit approximately changes $Y$ by $\hat{\beta}_1 \times 100$ percent on average.
+
+-   Linear-Log. $Y = \beta_0 + \beta_1 \ln(X)+ U$. Increasing $X$ by one percent approximately changes $Y$ by $\hat{\beta}_1 \times 0.01$ percent on average.
+
+-   Log-Log. $\ln(Y) = \beta_0 + \beta_1 \ln(X)+ U$. Increasing $X$ by one percent approximately changes $Y$ by $\hat{\beta}_1 \times 100$ percent on average.
+
+-   Multivariate Regression. $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_1 + \ldots + U$. Increasing $X_1$ by one unit changes changes $Y$ by $\hat{\beta}_1$ units, holding all other covariates constant, changes $Y$ by $\hat{\beta}_1$ on average.
+
+### Regression Assumptions
+
+Now that we are empowered with R to run regressions, it can be easy to lose sight of the theory. Recall the core assumptions of the classic framework.
+
+1.  Linear Model. This assumption states that the true model of the relationship between $X$ and $Y$ is linear.
+
+2.  Strict Exogeneity. $\mathbb{E}(U \vert X) = \mathbb{E}(U) = 0.$ This is a stronger way of saying that $U$ and $X$ are uncorrelated. A common way to break this assumption is to have ommited variable bias.
+
+3.  No Perfect Multicollinearity. The covariates need to be linearly independent. For example, the below regression drops age because it is a linear function of experience. But, experience squared is allowed because it is not a linear function of experience.
+
+```{r, eval = TRUE}
+lm(log(conrinc) ~ educ + exp + I(exp^2) + age,
+   data = gss) %>%
+  summary()
+```
+
+4.  Homoscedasticity. The variance of the error term is constant and finite.
+
+## Categorical Outcome Variables
+
+Above, we always assumed that $Y$ was continuous. If $Y$ is discrete, then we want to consider alternative specifications. We can certainly use the variable as is. However, the interpretation may not capture the goal of the analysis.
+
+```{r, eval = TRUE}
+
+# Diabetes 
+table(gss$diabetes, useNA = "always")
+
+
+#  Interpreting variable as if it were numeric
+lm(diabetes ~ educ,
+   data = gss) %>%
+  summary()
+
+```
+
+For the case of a binary $Y$ variable (it only takes two values), common specifications are probit and logit. Probit uses the cumulative distribution function (CDF) of the Normal distribution
+
+\begin{equation*}
+\mathbb{E}(Y \vert X = x) = \Pr(Y = 1 \vert X = x) = \Phi(\beta_0 + \beta_1 X),
+\end{equation*}
+
+where $\Phi(x) = \Pr(Z \leq x)$ for $Z$ distributed according to the standard Normal distribution (mean is 0 and standard deviation is 1). We can use `glm()` to estimate probit regressions.
+
+```{r, eval = TRUE}
+
+# Transform the variable to be 0/1 instead of 1/2
+gss <- gss %>%
+  mutate(diabetes_binary = diabetes - 1)
+table(gss$diabetes_binary)
+
+glm(diabetes_binary ~ educ,
+    family = binomial(link = "probit"),
+    data = gss) %>%
+  summary()
+
+```
+
+The interpretation is that if $X$ increases by 1, the $Z$-score of $Y$ changes by $\hat{\beta}_1$. That is:
+
+\begin{equation*}
+\widehat{\Pr(Y = 1 \vert X = x)} = \Phi(\hat{\beta}_0 + \hat{\beta}_1 X).
+\end{equation*}
+
+We can implement logit by changing the link function. The equation for the logistic regression is
+
+\begin{equation*}
+\mathbb{E}(Y \vert X = x) = \Pr(Y = 1 \vert X = x) = \frac{\exp(\beta_0 + \beta_1 X)}{1 + \exp(\beta_0 + \beta_1 X)}.
+\end{equation*}
+
+```{r, eval = TRUE}
+library(margins)
+
+glm(diabetes_binary ~ educ,
+    family = binomial(link = "logit"),
+    data = gss) %>%
+  summary()
+
+```
+
+The interpretation is that if $X$ increases by one unit, the log of the odds ratio changes by $\hat{\beta}_1$. The odds ratio is
+
+\begin{equation*}
+\ln \left[ \frac{\Pr(Y = 1)}{\Pr(Y = 0)} \right].
+\end{equation*}
+
+Another way to put this is that if $X$ increases by one unit the odds ratio changs by $\exp(\hat{\beta}_1)$.
+
+These are two examples of regression models with a binary outcome variable. If $Y$ is discrete but takes more than two values, then another model is needed. Multinomial logit is popular. In R, it is convenint to use the package `nnet`.
+
+```{r, eval = TRUE}
+library(nnet)
+
+# Would you say that in general your health is Excellent, Very good, Good, Fair, or Poor?
+table(gss$health1, useNA = "always")
+
+multinom(health1 ~ educ,
+         data = gss) %>%
+  summary()
+```
+
+Here we can interpret the coefficients as follows. We are comparing the log odds ratio of each value of $Y$ to a baseline value of $Y$. In this example, it is $HEALTH1 = 1$, which corresponds to excellent health. You can convert the variable to a factor and use `relevel()` to specify a different baseline category. The intercept and coefficient on $X$ depends on the level of $Y$.
+
+## The Goal of Program Evaluation
+
+The goal of program evaluation is to study the effectiveness of interventions. Decision makers, including policymakers and industry leaders, need to know to what extent (possibly costly) interventions will have their intended effects.
+
+In public policy and economics, emblematic questions in program evaluation include:
+
+-   Do programs that transfer cash to individuals reduce poverty?
+-   Does increasing the minimum wage affect employment?
+-   Does health insurance improve health outcomes?
+
+In industry, questions requiring casual analysis might be:
+
+-   Does changing the price of one item affect the overall amount customers spend?
+-   How does changing an interface affect user engagement?
+-   Do personalized discounts or recommendations result in additional spending?
+
+To consider these questions, we cannot rely solely on basic regression analysis.
+
+### Causality vs. Correlation
+
+Regression gets at correlation, not at causality. While this may be intuitive, we can review the fundamental concepts to have a more complete understanding of why regression may be inappropriate for drawing certain conclusions from the data.
+
+#### Causality
+
+In everyday situations, there can be a clear understanding of cause and effect. If I enter the pin of my door code, that will cause the front door of my house to unlock. There is no question here what was the cause and what was the effect. Decision makers are interested in understanding causality when it is not so obvious.
+
+Causality is the effects within a causal model keeping other conditions the same (*ceteris paribus*). A causal model basically contains the following elements
+
+-   Variables determined inside the model ($Y$). These are called outcome or dependent variables.
+-   Variables determined outside the model $(X, U)$. These are called covariates, regressors, or independent variables.
+-   Functional relationships between $(X, U)$ and $Y$. This can be written generally as $Y = g(X,U)$.
+
+Causality refers to some inherent relationship of cause $(X, U)$ and effect $Y$.
+
+#### Correlation
+
+Correlation refers to a statistical relationship between $X$ and $Y$. Mathematically, it is
+
+\begin{equation*}
+\rho_{X, Y} = \frac{\text{Cov}(X, Y)}{\sigma_X \sigma_Y}.
+\end{equation*}
+
+-   $\text{Cov}(X, Y)$ is the covariance between $X$ and $Y$. It is equal to $\mathbb{E}\left[(X - \mu_X)(Y - \mu_Y)\right]$, where $\mu_X$ and $\mu_Y$ are the means of $X$ and $Y$. The covariance measures how $X$ varies with $Y$ and how $Y$varies with $X$.
+-   $\sigma_X$ and $\sigma_Y$ are the standard deviations of $X$ and $Y$.
+
+Because the correlation is the covariance divided by the standard deviations, it can be thought of as a rescaled covariance. There are some important properties of correlation.
+
+-   Correlation is symmetric. This is one clear reason why the concepts of correlation and causality are separate.
+-   The sign of the correlation is equal to the sign of the covariance.
+-   The correlation is between $-1$ and $1$. This helps give a sense of the direction and magnitude of the linear relationship between $X$ and $Y$.
+
+## Activity: Practice with Regression 
+
+This activity will help you practice regression in R. Write your code in a `.R` file and upload it to Canvas at the end of class for participation points in today's class. You can write answers to the questions using comments. Do not worry about finsihing it, just get as far as you can. You will be graded for completion.
+
+1.  Go to Canvas \> Modules \> Module 1 \> Data. Download `GS2022.dta` and the codebook. Save them to a convenient folder.
+
+2.  What format is the data in? Load the data into R. Hint: Use the `haven` package.
+
+3.  In this activity, you will be looking at the variables `vote20` and `vote16`. Search these variables in the codebook until you get to the part that shows what the values represent.
+
+4.  Explore these variables. What is the voting turn-out in the GSS for the years 2016 and 2020? Using Google, how do they compare to the general population turn-out? What might this say about the GSS sample?
+
+5.  Create two new variables `vote_binary20` and `vote_binary16`. They should take the value `TRUE` if the individual voted and `FALSE` if they did not vote. If the individual is ineligible, the value should be `NA`. Using the command `table()`, check that your new variables are correctly defined.
+
+6.  Suppose you are interested in understanding how different characteristics are correlated with voting in the 2020 presidential election. Check the documentation and run summary statistics on the following variables about basic demographic characteristics: `conrinc`, `educ`, `hispanic`, `race`, `marital`, `age`, `sex`, `born`, `partyid`. Run a linear regression using these variables as predictors for voting in 2020. Make sure you use the variable you created in question 5.
+
+7.  Run probit and logit regressions using these varaibles as predictors for voting in 2020.
+
+8.  Based on 6 and 7, do you find anything interesting or surprising?
+
+9.  Do your own exploration of the codebook and look for other variables you think could be useful to predict voter turn-out for the 2020 presidential election. Feel free to keep or drop the variables from question 6. For each variable you use, make sure you first check the basic summary statistics of the variable.
+
+10. Did you find anything interesting or surprising? If someone were interested in predicting voter turn-out in 2024 and 2028, what other variables might they need that are not included in this dataset?
+
+
+## References
+
+The extract from the Census comes from the [NORC](https://gss.norc.org/us/en/gss/get-the-data.html). See @chatterjee_regression_2006 for an accessible background on regression. The notes on causality draw from Matt Mastens's *Identification and Causality* notes.
+
+
+

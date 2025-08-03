@@ -1,0 +1,300 @@
+---
+title: "Loading and Saving Data"
+---
+
+In this chapter, we will go through the R functions needed to load and save data. Most of the functions are built-in, but some require an additional package. Before going through this chapter, make sure you have the following package installed and loaded.
+
+```{r eval = TRUE, warning = FALSE, message = FALSE}
+library(readxl)
+```
+
+We will practice importing real data. Go to `Canvas > Modules > Module 1 > Data`. Download and decompress the file `Gapminder.zip` to a convenient folder on your computer.
+
+## Files, Folders, and Filepaths
+
+Before learning about loading and saving data in R, it is important to understand the file system of your computer and how to navigate it. All operating systems have a file system that can be manually browsed through the GUI (Graphical User Interface) of the operating system.
+
+-   Mac. Click on the `Finder` icon or navigate to `Go > Computer`.
+-   Windows. Click `Start > File Explorer`.
+
+There you can see files and folders that you commonly use. For example, you may save all of your schoolwork to a folder called `Documents`. You should have your own file organization system that allows you quickly locate files. This is important for coding in R because you save your data, scripts, and output to the file system of your computer. Staying organized can help you prevent making errors or duplicating work.
+
+Locate the folder that you use for this class. If you have not already made it, make it. Where are you saving it? You will need to know the **filepath** (also called **path**), or the location within your computer's file system structure.
+
+-   Mac. You can find the filepath of any file by right-clicking on the icon and selecting `Get Info`. You will se an item called `Where` which lists the filepath. It might take something that looks like:
+
+```         
+/Users/username/Documents
+```
+
+Between each slash is a folder. The filepath above leads to the `Documents` folder. Filepaths can also lead to files. For example, `/Users/username/Documents/myscript.R`.
+
+In Mac and Linux systems, you can use `~` to indicate the home directory for the user. The above filepath would then be `~/Documents`.
+
+-   Windows. You can find the filepath of any file by right-clicking on the icon and selecting `Copy as Path`. Then, paste the path to a document to see the path. You can also see the path in `Properties` of a file. The format of the filepath will look very similar to that for Mac computers. The main difference is that the slashes go the other way. Another difference is how the volume (e.g., the C drive) is indicated. For example, the analogous path for windows may look like:
+
+```         
+C:\Documents
+```
+
+### Getting the Filepath in R
+
+You can get the filepath from the console in R. Below is the filepath where I have the data for this chapter saved on my computer. Your filepath will look completely different.
+
+```{r, eval=TRUE}
+getwd()
+```
+
+The function `getwd()` stands for "get working directory." Directory is another name for a folder and working means current.
+
+### Changing the Filepath in R
+
+You will need to change the filepath in R to be able to load data you have saved on your computer. Otherwise, you will ask R to load a file that it cannot find. That is, R does not look through your whole computer for a file when you ask R to load it. Rather, it searches for the *exact file name* in the *working directory*. You can change, or set, the working directory with the command `setwd()`. The argument should be the filepath you want R to set as the working directory.
+
+```{r, eval= FALSE}
+setwd("/Users/annaziff/Documents")
+getwd()
+```
+
+Using your own computer's file system, try to set the directory to the folder you made for this class.
+
+```{r, eval= FALSE}
+setwd("")
+getwd()
+```
+
+### Absolute and Relative Paths
+
+The above examples are all absolute paths. That means that they have the home or volume at the root (the very beginning of the path). Relative paths allow you to navigate `forward'' and`backwards'' in the file system relative to your working directory. For example, if I am in the above folder and I want to navigate to `Desktop`, I can use two periods (`..`) to stand in for the prior directories. Each set of periods navigates me one directory backwards.
+
+```{r, eval=FALSE}
+
+# Absolute path
+setwd("/Users/annaziff/Desktop/1_PROJECTS_W/ECON470_Spring2025/Plan_Econ470")
+getwd()
+
+# Relative path
+setwd("../../..")
+getwd()
+```
+
+Here is another example of a relative path that combines navigating backwards with the two periods and navigating forwards with folder names.
+
+```{r, eval=FALSE}
+
+# Absolute path
+setwd("/Users/annaziff/Documents")
+getwd()
+
+# Relative path
+setwd("../Desktop")
+getwd()
+```
+
+### Common Problems and Solutions
+
+#### Mis-specified Filepaths
+
+It is easy to have a typo in the filepath. When this happens, R returns the following error.
+
+```         
+Error in setwd("/Users/aziff/Desktop/Econ470") : 
+  cannot change working directory
+```
+
+In response to this error, assume that you are the one who is wrong, not R, and double check your spelling and the layout of your file system. You can use the function `list.files()` to check the contents of your working directory.
+
+#### Collaborating Across Operating Systems
+
+If you are the only person using your code, it is fine to specify filepaths that work for only your computer. What if you are collaborating with someone else? If they use a different operating system, they also use a different slash (/ for Mac and \\ for Windows). Even if you both use the same operating system, you need the same file structure. Here are some solutions that can help make it easier to collaborate.
+
+Use `file.path()` to construct a filepath that uses the slashes appropriate for the computer's operating system.
+
+```{r, eval=FALSE}
+setwd(file.path("Users", "annaziff", "Desktop"))
+```
+
+This still requires everyone who will run the code to have the same file structure. You can define an object at the beginning of the script with the proper working directory for each user.
+
+```{r, eval=FALSE}
+fp <- file.path("Users", "asus", "Desktop", "OurProject")
+# fp <- file.path("C:", "Documents", "OurProject")
+```
+
+The more advanced option is to set up environment variables. This is outside the scope of the class.
+
+#### Difficult File and Folder Names
+
+Only use letters (`a-z`, `A-Z`), numbers (`0-9`), underscores (`_`), and hyphens (`-`) in your file and folder names. This will make navigating your file system much smoother. It is also good practice to have a consistent [naming system](https://en.wikipedia.org/wiki/Naming_convention_(programming)).
+
+|    Name    |                 Example                  |
+|:----------:|:----------------------------------------:|
+| Dash case  |           `my-file.txt`           |
+| CamelCase  | `myFile.txt`, `MyFile.txt` |
+| Snake case |         `my_file.txt`          |
+| Flat case  |           `myfile.txt`            |
+| UPPERCASE  |           `MYFILE.txt`            |
+
+## Importing and Exporting Data
+
+Importing text files, including those files with extensions `.txt` and `.csv` can be done with the function `read.table()`. This function reads a file and creates a data frame. The function `read.csv()` is a wrapper meaning it implements the same command but sets some defaults optimized for `.csv` files.
+
+```{r}
+df1 <- read.csv("Data/Gapminder/gapminder.csv")
+str(df1)
+head(df1) # Display the first 5 rows
+```
+
+This command does the exact same thing.
+
+```{r}
+df2 <- read.table("Data/Gapminder/gapminder.csv", header = TRUE, sep = ",")
+str(df2)
+```
+
+Here is an example of reading a `.txt` file with `read.delim()`. Note that we need to specify the delimiter, in this case a space. You will need to inspect your file to determine the delimiter.
+
+```{r}
+df3 <- read.delim("Data/Gapminder/gapminder.txt", sep = " ")
+str(df3)
+```
+
+These three functions have many arguments available to adjust how the data files are read. The argument `stringsAsFactors` is automatically set to `FALSE`. If it is set to `TRUE`, then variables with character strings are read in as factors.
+
+```{r}
+df4 <- read.csv("Data/Gapminder/gapminder.csv", stringsAsFactors = TRUE)
+str(df4)
+```
+
+You can specify the classes of all the columns using the argument `colClasses`. This is especially usefull if the dataset is larger as it means that R does not need to determine the classes itself.
+
+```{r}
+df5 <- read.csv("Data/Gapminder/gapminder.csv", 
+                colClasses = c("character", "integer", "double", "factor"))
+str(df5)
+```
+
+Column names (or variable names) and row names can be set while reading the file as well.
+
+```{r}
+df6 <- read.csv("Data/Gapminder/gapminder.csv",
+                col.names = c("Country", "GDP", "GiniIndex", "Region")) 
+# row.names for rows
+str(df6) 
+```
+
+If you just want to get a sense of what types of variables a dataset contains, you can use the `nrows` argument to read in very few rows. This is especially helpful with larger datasets.
+
+```{r}
+checkcols <- read.csv("Data/Gapminder/gapminder.csv",
+                      nrows = 3)
+checkcols
+```
+
+The built-in functions to export data are very similar to those to import data. Again, `write.table()` is the general function with `write.csv()` being a wrapper for different file types. Here is an example data frame that we will export.
+
+```{r}
+df <- data.frame(id = seq(1:50),
+                 v1 = rnorm(50, mean = 10, sd = 2),
+                 v2 = rbinom(50, size = 1, prob = 0.5),
+                 v3 = c(TRUE, FALSE),
+                 v4 = c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5"))
+head(df)
+```
+
+Before exporting, make sure the correct directory is set. Remember you can use `getwd()` to check and `setwd()` to change the directory.
+
+The function `write.csv()` exports a comma-delimited text file. You need to specify the object to be saved and the name of the file. The argument `row.names` determines whether the row names are exported as well. Unless you have custom row names, it is useful to set this argument to `FALSE`.
+
+```{r, eval=FALSE}
+write.csv(df, file = "Data/Gapmidner/Output/df_csv.csv", row.names = FALSE)
+```
+
+
+For greater generality, `write.table()` is available.
+
+```{r}
+write.table(df, file = "Data/Gapminder/Output_Data/df_table.txt", sep = "t")
+```
+
+If you want to read Excel files, you will need an external package. A good option is the package `readxl` to access the function `read_excel()`. This package relies on tibbles, which will be discussed in chapter 5.
+
+```{r}
+tib4 <- read_excel("Data/Gapminder/gapminder.xlsx")
+head(tib4)
+```
+
+Other packages that allow you to read and write Excel files include `xlsx` and `r2excel`.
+
+There are other packages that allow you to import and export datasets in other formats. For example, the `foreign` package allows for data files from SPSS, SAS, and STATA.
+
+### R Saved Objects
+
+There are R-specific data formats to save the environment or components of it. To save the entire environment, use the `.RData` format.
+
+```{r}
+ids <- 1:100
+verbose_sqrt <- function(num) {
+  if (num >= 0) {
+    return(sqrt(num))
+  } else {
+    return("Negative number input.")
+  }
+}
+save(ids, verbose_sqrt, file = "Data/Gapminder/Output_Data/workspace.RData")
+```
+
+This file includes both the objects and the names of the objects. You can directly load `.RData` and the workspace is populated. If you only want to save one object, you can use `.rds` files instead. These do not save the object's name. They are very memory-efficient (similar to saving a zipped file).
+
+```{r}
+head(df)
+saveRDS(df, "Data/Gapminder/Output_Data/dataframe.rds")
+```
+
+Importing these objects is done as follows.
+
+```{r}
+load("Data/Gapminder/Output_Data/workspace.RData") # Imports objects and names
+mydf <- readRDS("Data/Gapminder/Output_Data/dataframe.rds") # Imports one object assigned to mydf
+```
+
+### Select Variables
+
+```{r}
+df <- read.csv("Data/Gapminder/gapminder_large.csv")
+str(df)
+```
+
+The built-in functions import data as data frames. Chapter 2 discusses how to select variables (columns). Here is a small review. To practice, anticipate what each line will do before running it.
+
+```{r, eval = FALSE}
+df[, 1:3]
+df[, c(2, 4)]
+df[, "cpi_2017"]
+df[, c("lifeexp_2012", "cpi_2016")]
+df[c("country", "region")]
+df[1:3]
+df$gini_2015
+```
+
+## Best Practices for Data Handling
+
+Now that you know how to load and save data, it is important to implement some rules to safeguard your data. The below are some simple best practices to keep in mind.
+
+### Maintain the Itegrity of the Raw Data
+
+When it comes to data management, one advantage of R over a program like Excel is that it makes it easy to write a script that can be run again and again, exactly the same way. For this to work, the original raw dataset needs to remain as is, without any changes. Never overwrite the raw data. Instead, create a new ''cleaned'' dataset (chapter 5 goes through how to clean data) that can be created by simply running your R script.
+
+### Respect the Data Use Conditions
+
+Some data come with conditions to respect the privacy of the data subjects or the proprietary nature of the data. Some firms or agencies only share data after you sign a contract stipulating their requirements to use the data. Even downloading publicly available data can require an agreement. It is important to comply with these requirements. Not only do you threaten your own integrity by breaking them, but you make that entity less likely to share its data in the future.
+
+### Respect the Data Subjects
+
+This is especially important for data collected on vulnerable populations, but it should always hold that you respect the data subjects. Handling data in R can feel far removed from the collection process, but maintaining the trust of those who provide information is an essential part of data science and research.
+
+## Further Reading
+
+The above information comes from chapters 5.1-5.3, 6, and 21 of @boehmke_data_2016, chapters 2.2.5 and 3 of @zamora_saiz_introduction_2020. See @zamora_saiz_introduction_2020 chapter 3 for information on `data.table`.
+
+### References
