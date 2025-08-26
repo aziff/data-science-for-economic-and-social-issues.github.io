@@ -34,7 +34,7 @@ Despite these benefits, there are a few downsides that any user must consider.
    - **Mac**: Select the version that corresponds with the version of your operating system and chip type (silicon vs. Intel). Follow the installation instructions.
    - **Linux**: Click on your distribution. Follow the installation instructions.
   
-Confirm that installation was successful by opening the R program. When you open R, you will see a console that looks as figure below, or at least very similar. Every time you open R, a new session begins. At the start of each session, the console prints some information, like the version of R and some basic help commands. The line with `>` is the command line. This is where you can type commands. Try typing `print("Hello world!")` and press `Enter` or `Return`.
+Confirm that installation was successful by opening the R program. When you open R, you will see a console as below, or at least very similar. Every time you open R, a new session begins. At the start of each session, the console prints some information, like the version of R and some basic help commands. The line with `>` is the command line. This is where you can type commands. Try typing `print("Hello world!")` and press `Enter` or `Return`.
 
 ```{r echo = FALSE, fig.cap = "R Console", fig.align = "center", out.width = "40%", fig.alt= "Standalone R Console window displaying version info and a restored command history path."}
 knitr::include_graphics("Figures/RConsole.png")
@@ -68,7 +68,7 @@ There are three segments of the initial RStudio workspace: the console (left seg
 knitr::include_graphics("Figures/RStudioOpeningWorkspace.png")
 ```
 
-There is one more segment that is crucial: the script editor. Although you can type commands directly into the console, it is much easier and better practice to execute code from scripts. To open the script editor with an empty file, click `File > New File > R Script`. The file extension is `.R`. With all four segments of the RStudio workspace open (Figure below), we can now go through each one in detail.
+There is one more segment that is crucial: the script editor. Although you can type commands directly into the console, it is much easier and better practice to execute code from scripts. To open the script editor with an empty file, click `File > New File > R Script`. The file extension is `.R`. With all four segments of the RStudio workspace open as in the below figure, we can now go through each one in detail.
 
 ```{r echo = FALSE, fig.cap = "RStudio Full Workspace", fig.align = "center", out.width = "80%", fig.alt="RStudio start-up interface showing an empty script editor, console, and global environment."}
 knitr::include_graphics("Figures/RStudioFullWorkspace.png")
@@ -89,7 +89,7 @@ greeting <- "Hello world!"
 print(greeting)
 ```
 
-Execute the code by highlighting all lines. Then click `Run`, circled in Figure 4.
+Execute the code by highlighting all lines. Then click `Run` (circled below).
 
 ```{r echo = FALSE, fig.cap = "RStudio Run Button", fig.align = "center", out.width = "80%", fig.alt="RStudio with a script assigning and printing 'Hello world!', highlighting the Run button in the editor pane."}
 knitr::include_graphics("Figures/RunButton.png")
