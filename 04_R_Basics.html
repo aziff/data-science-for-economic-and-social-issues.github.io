@@ -553,12 +553,12 @@ window.Quarto = {
 <pre><code>[1] 0.183</code></pre>
 </div>
 </div>
-<p>Recall from <a href="03_Command_Line_and_Git.html#chapter1">chapter 3</a> that the documentation for functions is readily available from the command line. Online searches can help bolster this information with troubleshooting and examples.</p>
+<p>Recall from <a href="02_Setup.html#chapter2">chapter 2</a> that the documentation for functions is readily available from the command line. Online searches can help bolster this information with troubleshooting and examples.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>?date <span class="co"># Alternatively help(date)</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Tue Aug 26 08:51:13 2025"</code></pre>
+<pre><code>[1] "Sun Aug 31 08:52:15 2025"</code></pre>
 </div>
 </div>
 <p>Typing the function without <code>()</code> will show the function’s code. This is useful if you want to see exactly what a function does. The actual substance of the function <code>factorial()</code> is <code>gamma(x + 1)</code>. The <code>&lt;bytecode:... &gt;</code> is where the function is stored and <code>&lt;environment:...&gt;</code> is the package that defines that function.</p>
@@ -567,7 +567,7 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>function (x) 
 gamma(x + 1)
-&lt;bytecode: 0x13fd54540&gt;
+&lt;bytecode: 0x11ed54540&gt;
 &lt;environment: namespace:base&gt;</code></pre>
 </div>
 </div>
@@ -1276,10 +1276,10 @@ length</code></pre>
 <div class="sourceCode cell-code" id="cb255"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb255-1"><a href="#cb255-1" aria-hidden="true" tabindex="-1"></a>Q <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">9</span>, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
 <span id="cb255-2"><a href="#cb255-2" aria-hidden="true" tabindex="-1"></a>Q</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>           [,1]       [,2]      [,3]
-[1,] 0.07622498 0.08872095 0.7560757
-[2,] 0.49842596 0.50209546 0.2028700
-[3,] 0.70013478 0.13579543 0.7156984</code></pre>
+<pre><code>          [,1]      [,2]      [,3]
+[1,] 0.4265761 0.5573076 0.2276983
+[2,] 0.1964281 0.6570668 0.6684599
+[3,] 0.8275038 0.2060623 0.8883896</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb257"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb257-1"><a href="#cb257-1" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">TRUE</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
 <span id="cb257-2"><a href="#cb257-2" aria-hidden="true" tabindex="-1"></a>R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
