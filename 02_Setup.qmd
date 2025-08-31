@@ -190,7 +190,7 @@ greeting <- "Hello world!"
 print(greeting)
 ```
 
-#### Help
+#### Help {#chapter2}
 
 The `Help` tab displays the documentation for functions. In the console, type the following.
 

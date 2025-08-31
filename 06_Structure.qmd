@@ -357,9 +357,9 @@ apply(mtcars, 2, function(x) tapply(x, mtcars$cyl, mean))
 
 ### Practice Exercises 
 
-1. Create a list with 4 elements, each containing a vector with 30 numbers: the first element is 30 draws from the uniform $[0,1]$ distribution, the second element is 30 draws from the uniform $[1, 2]$ distribution, the third element is 30 draws from the uniform $[2, 3]$ distribution, and the fourth element is 30 draws from the uniform $[3, 4]$ distribution. How does `lapply` and `sapply` differ here? -->
+1. Create a list with 4 elements, each containing a vector with 30 numbers: the first element is 30 draws from the uniform $[0,1]$ distribution, the second element is 30 draws from the uniform $[1, 2]$ distribution, the third element is 30 draws from the uniform $[2, 3]$ distribution, and the fourth element is 30 draws from the uniform $[3, 4]$ distribution. How does `lapply` and `sapply` differ here? 
 
-2. Here is an example of implementing the function `quantile`. Calculate the 25th, 50th, and 75th percentile for the columns of `mtcars` using `apply()`. -->
+2. Here is an example of implementing the function `quantile`. Calculate the 25th, 50th, and 75th percentile for the columns of `mtcars` using `apply()`. 
 
 ```{r}
 quantile(1:100, probs = c(0.10, 0.90))

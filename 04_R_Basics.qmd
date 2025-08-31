@@ -51,7 +51,7 @@ log(3, base = 10)
 round(0.183104, digits = 3)
 ```
 
-Recall from [chapter 3](#chapter1) that the documentation for functions is readily available from the command line. Online searches can help bolster this information with troubleshooting and examples.
+Recall from [chapter 2](#chapter2) that the documentation for functions is readily available from the command line. Online searches can help bolster this information with troubleshooting and examples.
 
 ```{r eval = TRUE}
 ?date # Alternatively help(date)
