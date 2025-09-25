@@ -439,10 +439,11 @@ window.Quarto = {
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggthemes)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(wesanderson) <span class="co"># Optional</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(wesanderson) <span class="co"># Optional</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>One of R’s biggest advantages is its potential for creating informative and high-quality plots. This chapter goes through the built-in functions to produce graphs. Even just these functions allow for a wide variety of types of plots and aesthetic adjustments. Then, this chapter goes through the functions in the package <code>ggplot2</code>. These functions add a professional polish to the plots that is harder to achieve with the built-in functions.</p>
 <section id="basic-graphs" class="level2" data-number="11.1">
@@ -1609,7 +1610,7 @@ Private Education    0.341  0.974  1.80  2.6  3.64</code></pre>
 <span id="cb109-3"><a href="#cb109-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">30</span>)) <span class="sc">+</span></span>
 <span id="cb109-4"><a href="#cb109-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 126 rows containing missing values or values outside the scale range
+<pre><code>Warning: Removed 129 rows containing missing values or values outside the scale range
 (`geom_point()`).</code></pre>
 </div>
 <div class="cell-output-display">
@@ -2303,9 +2304,9 @@ Private Education    0.341  0.974  1.80  2.6  3.64</code></pre>
 <p>This activity will help you practice regression in R. Write your code in a <code>.R</code> file and upload it to Canvas at the end of class for participation points in today’s class. You can write answers to the questions using comments. Do not worry about finishing it, just get as far as you can. You will be graded for completion.</p>
 <ol type="1">
 <li><p>Make sure you have <code>ggplot2</code> installed and loaded. Use the functions from that package in all of the below questions.</p></li>
-<li><p>Download the dataset <code>GSS2022.dta</code> to your computer. It is on Canvas &gt; Modules &gt; Module 1 &gt; Datasets. Open the dataset in R using <code>read_dta()</code> from the package <code>haven</code>.</p></li>
-<li><p>Make a bar plot of the variable <code>tax</code>. Refer to the documentation to learn what this variable means. Make sure you look for the place in the PDF where it lists what the values mean.</p></li>
-<li><p>Edit your plot from 3 to have labels for the values of <code>tax</code>. To do this, you can create a new variable <code>tax_str</code> that takes the values “Too High”, “About Right”, “Too Low”. It can be a character variable or a factor variable.</p></li>
+<li><p>Download the dataset <code>GSS2022.dta</code> to your computer. It is on Canvas &gt; Modules &gt; Data. Open the dataset in R using <code>read_dta()</code> from the package <code>haven</code>.</p></li>
+<li><p>Make a bar plot of the variable <code>tax</code>. Refer to the documentation to learn what this variable means. Make sure you look for the place in the PDF codebook where it lists what the values mean.</p></li>
+<li><p>Edit your plot from 3 to have labels for the values of <code>tax</code>. To do this, you can create a new variable <code>tax_str</code> that takes the values “Too High”, “About Right”, “Too Low”. It can be a character variable or a factor variable. Hint: It is easiest to do it with a factor variable using the function <code>factor</code>.</p></li>
 <li><p>Add these lines to your plot to see how it changes the aesthetics of the plot.</p></li>
 </ol>
 <div class="cell">
@@ -2316,7 +2317,7 @@ Private Education    0.341  0.974  1.80  2.6  3.64</code></pre>
 <span id="cb167-5"><a href="#cb167-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="6" type="1">
-<li><p>Make a bar plot of the variable <code>partyid</code>. Look in the documentation to see what that variable means. What is the most common response? Drop observations if partyid is 7 (other party).</p></li>
+<li><p>Make a bar plot of the variable <code>partyid</code>. Look in the documentation to see what that variable means. What is the most common response? Drop observations if <code>partyid</code> is 7 (other party).</p></li>
 <li><p>Run the below code to see how it changes the aesthetics. Do these aesthetics improve the interpretation of the graph? If you have trouble distinguishing red and blue, the colors go from blue to red as <code>partyid</code> goes from 0 to 6.</p></li>
 </ol>
 <div class="cell">
@@ -2333,9 +2334,9 @@ Private Education    0.341  0.974  1.80  2.6  3.64</code></pre>
 <span id="cb168-11"><a href="#cb168-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="8" type="1">
-<li><p>Let’s try to graphically answer the following question: Does political party correlate with opinions on the federal income tax?. Create a bar plot that graphs the count of responses to <code>tax</code> for each level of <code>partyid</code>. Use the argument <code>position = "dodge"</code> in <code>geom_bar()</code>.</p></li>
+<li><p>Let’s try to graphically answer the following question: Does political party correlate with opinions on the federal income tax?. Create a bar plot that graphs the count of responses to <code>tax</code> for each level of <code>partyid</code>. Use the argument <code>position = "dodge"</code> in <code>geom_bar()</code>. The x-axis should be the values of <code>partyid</code> and there should be three bars for each value of <code>tax_str</code> corresponding to the party identification.</p></li>
 <li><p>Let’s make this even easier to interpret. Create a variable that simplifies the <code>partyid</code> variable into two or three parties (Democrat, Independent, Republican). Use your judgement on how to categorize these parties.</p></li>
-<li><p>Make a bar plot of the response to <code>tax_str</code> by the variable you created in question 9. The x-axis should be the values of <code>tax_str</code> and there should be two or three bars for each value corresponding to the parties.</p></li>
+<li><p>Make a bar plot of the response to the variable you created in question 9 by <code>tax_str</code> . The x-axis should be the values of <code>tax_str</code> and there should be two or three bars for each value corresponding to the parties.</p></li>
 <li><p>Challenging! By political party calculated in 9, calculate the percent who respond to each value of <code>tax</code>. Create a variable. Repeat 10 but use this variable.</p></li>
 </ol>
 <p>This analysis is done in <a href="http://ricardotruglia.bol.ucla.edu/assets/partisan_divide.pdf">this paper</a>! Check it out if you are interested.</p>
