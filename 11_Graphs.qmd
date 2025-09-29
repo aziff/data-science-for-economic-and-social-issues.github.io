@@ -8,6 +8,7 @@ Here are all the libraries you should install for this chapter.
 library(dplyr)
 library(ggplot2)
 library(ggthemes)
+library(haven)
 library(RColorBrewer)
 library(readr)
 library(tidyr)
@@ -1067,11 +1068,11 @@ This activity will help you practice regression in R. Write your code in a `.R` 
 
 1.  Make sure you have `ggplot2` installed and loaded. Use the functions from that package in all of the below questions.
 
-2.  Download the dataset `GSS2022.dta` to your computer. It is on Canvas \> Modules \> Module 1 \> Datasets. Open the dataset in R using `read_dta()` from the package `haven`.
+2.  Download the dataset `GSS2022.dta` to your computer. It is on Canvas \> Modules \> Data. Open the dataset in R using `read_dta()` from the package `haven`.
 
-3.  Make a bar plot of the variable `tax`. Refer to the documentation to learn what this variable means. Make sure you look for the place in the PDF where it lists what the values mean.
+3.  Make a bar plot of the variable `tax`. Refer to the documentation to learn what this variable means. Make sure you look for the place in the PDF codebook where it lists what the values mean.
 
-4.  Edit your plot from 3 to have labels for the values of `tax`. To do this, you can create a new variable `tax_str` that takes the values "Too High", "About Right", "Too Low". It can be a character variable or a factor variable.
+4.  Edit your plot from 3 to have labels for the values of `tax`. To do this, you can create a new variable `tax_str` that takes the values "Too High", "About Right", "Too Low". It can be a character variable or a factor variable. Hint: It is easiest to do it with a factor variable using the function `factor`.
 
 5.  Add these lines to your plot to see how it changes the aesthetics of the plot.
 
@@ -1083,7 +1084,7 @@ This activity will help you practice regression in R. Write your code in a `.R` 
         axis.title = element_text(size = 14))
 ```
 
-6.  Make a bar plot of the variable `partyid`. Look in the documentation to see what that variable means. What is the most common response? Drop observations if partyid is 7 (other party).
+6.  Make a bar plot of the variable `partyid`. Look in the documentation to see what that variable means. What is the most common response? Drop observations if `partyid` is 7 (other party).
 
 7.  Run the below code to see how it changes the aesthetics. Do these aesthetics improve the interpretation of the graph? If you have trouble distinguishing red and blue, the colors go from blue to red as `partyid` goes from 0 to 6.
 
@@ -1101,11 +1102,11 @@ ggplot(gss) +
         legend.position = "none")
 ```
 
-8.  Let's try to graphically answer the following question: Does political party correlate with opinions on the federal income tax?. Create a bar plot that graphs the count of responses to `tax` for each level of `partyid`. Use the argument `position = "dodge"` in `geom_bar()`.
+8.  Let's try to graphically answer the following question: Does political party correlate with opinions on the federal income tax?. Create a bar plot that graphs the count of responses to `tax` for each level of `partyid`. Use the argument `position = "dodge"` in `geom_bar()`. The x-axis should be the values of `partyid` and there should be three bars for each value of `tax_str` corresponding to the party identification.
 
 9.  Let's make this even easier to interpret. Create a variable that simplifies the `partyid` variable into two or three parties (Democrat, Independent, Republican). Use your judgement on how to categorize these parties.
 
-10. Make a bar plot of the response to `tax_str` by the variable you created in question 9. The x-axis should be the values of `tax_str` and there should be two or three bars for each value corresponding to the parties.
+10. Make a bar plot of the response to the variable you created in question 9 by `tax_str` . The x-axis should be the values of `tax_str` and there should be two or three bars for each value corresponding to the parties.
 
 11. Challenging! By political party calculated in 9, calculate the percent who respond to each value of `tax`. Create a variable. Repeat 10 but use this variable.
 
