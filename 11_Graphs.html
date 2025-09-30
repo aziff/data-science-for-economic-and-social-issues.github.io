@@ -404,7 +404,6 @@ window.Quarto = {
   <li><a href="#modifying-the-look-of-the-plot" id="toc-modifying-the-look-of-the-plot" class="nav-link" data-scroll-target="#modifying-the-look-of-the-plot"><span class="header-section-number">11.2.2</span> Modifying the Look of the Plot</a></li>
   <li><a href="#save" id="toc-save" class="nav-link" data-scroll-target="#save"><span class="header-section-number">11.2.3</span> Save</a></li>
   </ul></li>
-  <li><a href="#a-in-class-activity-practice-with-graphing" id="toc-a-in-class-activity-practice-with-graphing" class="nav-link" data-scroll-target="#a-in-class-activity-practice-with-graphing">11.a In-Class Activity: Practice with Graphing</a></li>
   <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">11.3</span> Further Reading</a>
   <ul class="collapse">
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">11.3.1</span> References</a></li>
@@ -1610,7 +1609,7 @@ Private Education    0.341  0.974  1.80  2.6  3.64</code></pre>
 <span id="cb109-3"><a href="#cb109-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">30</span>)) <span class="sc">+</span></span>
 <span id="cb109-4"><a href="#cb109-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 129 rows containing missing values or values outside the scale range
+<pre><code>Warning: Removed 127 rows containing missing values or values outside the scale range
 (`geom_point()`).</code></pre>
 </div>
 <div class="cell-output-display">
@@ -2297,49 +2296,41 @@ Private Education    0.341  0.974  1.80  2.6  3.64</code></pre>
 <span id="cb166-4"><a href="#cb166-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"Example2.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The available extensions are <code>.eps</code>, <code>.pdf</code>, <code>.svg</code>, <code>.wmf</code>, <code>.png</code>, <code>.jpg</code>, <code>.bmp</code>, and <code>.tiff</code>.</p>
+<!-- ## In-Class Activity: Practice with Graphing  -->
+<!-- This activity will help you practice regression in R. Write your code in a `.R` file and upload it to Canvas at the end of class for participation points in today's class. You can write answers to the questions using comments. Do not worry about finishing it, just get as far as you can. You will be graded for completion. -->
+<!-- 1.  Make sure you have `ggplot2` installed and loaded. Use the functions from that package in all of the below questions. -->
+<!-- 2.  Download the dataset `GSS2022.dta` to your computer. It is on Canvas \> Modules \> Data. Open the dataset in R using `read_dta()` from the package `haven`. -->
+<!-- 3.  Make a bar plot of the variable `tax`. Refer to the documentation to learn what this variable means. Make sure you look for the place in the PDF codebook where it lists what the values mean. -->
+<!-- 4.  Edit your plot from 3 to have labels for the values of `tax`. To do this, you can create a new variable `tax_str` that takes the values "Too High", "About Right", "Too Low". It can be a character variable or a factor variable. Hint: It is easiest to do it with a factor variable using the function `factor`. -->
+<!-- 5.  Add these lines to your plot to see how it changes the aesthetics of the plot. -->
+<!-- ```{r, eval = FALSE} -->
+<!--   labs(x = "Do you consider the amount of federal income tax you pay as too high, about right, or too low?", -->
+<!--      y = "Count") + -->
+<!--   theme_bw() + -->
+<!--   theme(axis.text = element_text(color = "black", size = 12), -->
+<!--         axis.title = element_text(size = 14)) -->
+<!-- ``` -->
+<!-- 6.  Make a bar plot of the variable `partyid`. Look in the documentation to see what that variable means. What is the most common response? Drop observations if `partyid` is 7 (other party). -->
+<!-- 7.  Run the below code to see how it changes the aesthetics. Do these aesthetics improve the interpretation of the graph? If you have trouble distinguishing red and blue, the colors go from blue to red as `partyid` goes from 0 to 6. -->
+<!-- ```{r, eval = FALSE} -->
+<!-- ggplot(gss) +  -->
+<!--   geom_bar(aes(x = partyid,  -->
+<!--                fill = as.factor(partyid))) + -->
+<!--   scale_fill_manual(values = c("#0713F7", "#2615D8", "#4616B9","#65189A",  -->
+<!--                               "#84197B", "#C31C3D", "#E21E1E")) + -->
+<!--   labs(x = "Political Party", -->
+<!--        y = "Count") + -->
+<!--   theme_bw() + -->
+<!--   theme(axis.text = element_text(color = "black", size = 12), -->
+<!--         axis.title = element_text(size = 14), -->
+<!--         legend.position = "none") -->
+<!-- ``` -->
+<!-- 8.  Let's try to graphically answer the following question: Does political party correlate with opinions on the federal income tax?. Create a bar plot that graphs the count of responses to `tax` for each level of `partyid`. Use the argument `position = "dodge"` in `geom_bar()`. The x-axis should be the values of `partyid` and there should be three bars for each value of `tax_str` corresponding to the party identification. -->
+<!-- 9.  Let's make this even easier to interpret. Create a variable that simplifies the `partyid` variable into two or three parties (Democrat, Independent, Republican). Use your judgement on how to categorize these parties. -->
+<!-- 10. Make a bar plot of the response to the variable you created in question 9 by `tax_str` . The x-axis should be the values of `tax_str` and there should be two or three bars for each value corresponding to the parties. -->
+<!-- 11. Challenging! By political party calculated in 9, calculate the percent who respond to each value of `tax`. Create a variable. Repeat 10 but use this variable. -->
+<!-- This analysis is done in [this paper](http://ricardotruglia.bol.ucla.edu/assets/partisan_divide.pdf)! Check it out if you are interested. -->
 </section>
-</section>
-<section id="a-in-class-activity-practice-with-graphing" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="a-in-class-activity-practice-with-graphing">11.a In-Class Activity: Practice with Graphing</h2>
-<p>This activity will help you practice regression in R. Write your code in a <code>.R</code> file and upload it to Canvas at the end of class for participation points in today’s class. You can write answers to the questions using comments. Do not worry about finishing it, just get as far as you can. You will be graded for completion.</p>
-<ol type="1">
-<li><p>Make sure you have <code>ggplot2</code> installed and loaded. Use the functions from that package in all of the below questions.</p></li>
-<li><p>Download the dataset <code>GSS2022.dta</code> to your computer. It is on Canvas &gt; Modules &gt; Data. Open the dataset in R using <code>read_dta()</code> from the package <code>haven</code>.</p></li>
-<li><p>Make a bar plot of the variable <code>tax</code>. Refer to the documentation to learn what this variable means. Make sure you look for the place in the PDF codebook where it lists what the values mean.</p></li>
-<li><p>Edit your plot from 3 to have labels for the values of <code>tax</code>. To do this, you can create a new variable <code>tax_str</code> that takes the values “Too High”, “About Right”, “Too Low”. It can be a character variable or a factor variable. Hint: It is easiest to do it with a factor variable using the function <code>factor</code>.</p></li>
-<li><p>Add these lines to your plot to see how it changes the aesthetics of the plot.</p></li>
-</ol>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb167"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Do you consider the amount of federal income tax you pay as too high, about right, or too low?"</span>,</span>
-<span id="cb167-2"><a href="#cb167-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
-<span id="cb167-3"><a href="#cb167-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb167-4"><a href="#cb167-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">12</span>),</span>
-<span id="cb167-5"><a href="#cb167-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ol start="6" type="1">
-<li><p>Make a bar plot of the variable <code>partyid</code>. Look in the documentation to see what that variable means. What is the most common response? Drop observations if <code>partyid</code> is 7 (other party).</p></li>
-<li><p>Run the below code to see how it changes the aesthetics. Do these aesthetics improve the interpretation of the graph? If you have trouble distinguishing red and blue, the colors go from blue to red as <code>partyid</code> goes from 0 to 6.</p></li>
-</ol>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb168"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gss) <span class="sc">+</span> </span>
-<span id="cb168-2"><a href="#cb168-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">x =</span> partyid, </span>
-<span id="cb168-3"><a href="#cb168-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> <span class="fu">as.factor</span>(partyid))) <span class="sc">+</span></span>
-<span id="cb168-4"><a href="#cb168-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#0713F7"</span>, <span class="st">"#2615D8"</span>, <span class="st">"#4616B9"</span>,<span class="st">"#65189A"</span>, </span>
-<span id="cb168-5"><a href="#cb168-5" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"#84197B"</span>, <span class="st">"#C31C3D"</span>, <span class="st">"#E21E1E"</span>)) <span class="sc">+</span></span>
-<span id="cb168-6"><a href="#cb168-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Political Party"</span>,</span>
-<span id="cb168-7"><a href="#cb168-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
-<span id="cb168-8"><a href="#cb168-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb168-9"><a href="#cb168-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">12</span>),</span>
-<span id="cb168-10"><a href="#cb168-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>),</span>
-<span id="cb168-11"><a href="#cb168-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ol start="8" type="1">
-<li><p>Let’s try to graphically answer the following question: Does political party correlate with opinions on the federal income tax?. Create a bar plot that graphs the count of responses to <code>tax</code> for each level of <code>partyid</code>. Use the argument <code>position = "dodge"</code> in <code>geom_bar()</code>. The x-axis should be the values of <code>partyid</code> and there should be three bars for each value of <code>tax_str</code> corresponding to the party identification.</p></li>
-<li><p>Let’s make this even easier to interpret. Create a variable that simplifies the <code>partyid</code> variable into two or three parties (Democrat, Independent, Republican). Use your judgement on how to categorize these parties.</p></li>
-<li><p>Make a bar plot of the response to the variable you created in question 9 by <code>tax_str</code> . The x-axis should be the values of <code>tax_str</code> and there should be two or three bars for each value corresponding to the parties.</p></li>
-<li><p>Challenging! By political party calculated in 9, calculate the percent who respond to each value of <code>tax</code>. Create a variable. Repeat 10 but use this variable.</p></li>
-</ol>
-<p>This analysis is done in <a href="http://ricardotruglia.bol.ucla.edu/assets/partisan_divide.pdf">this paper</a>! Check it out if you are interested.</p>
 </section>
 <section id="further-reading" class="level2" data-number="11.3">
 <h2 data-number="11.3" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">11.3</span> Further Reading</h2>

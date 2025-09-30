@@ -560,17 +560,17 @@ window.Quarto = {
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>random1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fu">dim</span>(df)[<span class="dv">1</span>])</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(random1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -1.46866888 -1.44071853  0.26183506 -0.09754234  0.61096895 -0.30599705</code></pre>
+<pre><code>[1]  0.9345153 -0.2154909  1.1646996  1.8320702 -0.6969759 -1.0655624</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">cbind</span>(df, random1)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>df[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">c</span>(<span class="st">"COUNTRY"</span>, <span class="st">"random1"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      COUNTRY     random1
-1 Afghanistan -1.46866888
-2     Albania -1.44071853
-3     Algeria  0.26183506
-4     Andorra -0.09754234
-5      Angola  0.61096895</code></pre>
+<pre><code>      COUNTRY    random1
+1 Afghanistan  0.9345153
+2     Albania -0.2154909
+3     Algeria  1.1646996
+4     Andorra  1.8320702
+5      Angola -0.6969759</code></pre>
 </div>
 </div>
 <p>This method has the advantage that it can be used to add more than one variable at a time.</p>
@@ -580,12 +580,12 @@ window.Quarto = {
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">cbind</span>(df, random2, random3)</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>df[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">c</span>(<span class="st">"COUNTRY"</span>, <span class="st">"random2"</span>, <span class="st">"random3"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      COUNTRY   random2   random3
-1 Afghanistan 0.7621366 3.0740378
-2     Albania 0.7262874 0.4865872
-3     Algeria 0.4498773 1.3483033
-4     Andorra 0.2825027 1.3485005
-5      Angola 0.3152791 0.3402573</code></pre>
+<pre><code>      COUNTRY    random2    random3
+1 Afghanistan 0.10968400 0.42579293
+2     Albania 0.17771483 0.03977906
+3     Algeria 0.06446808 0.05574080
+4     Andorra 0.64608303 0.05933960
+5      Angola 0.02071502 0.48962681</code></pre>
 </div>
 </div>
 <p>The following shortcut is helpful to create one variable at a time.</p>
@@ -593,12 +593,12 @@ window.Quarto = {
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>random4 <span class="ot">&lt;-</span> df<span class="sc">$</span>random3<span class="sc">^</span><span class="dv">2</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>df[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">c</span>(<span class="st">"COUNTRY"</span>, <span class="st">"random4"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      COUNTRY   random4
-1 Afghanistan 9.4497085
-2     Albania 0.2367671
-3     Algeria 1.8179218
-4     Andorra 1.8184536
-5      Angola 0.1157750</code></pre>
+<pre><code>      COUNTRY     random4
+1 Afghanistan 0.181299616
+2     Albania 0.001582374
+3     Algeria 0.003107037
+4     Andorra 0.003521188
+5      Angola 0.239734414</code></pre>
 </div>
 </div>
 </section>
@@ -634,21 +634,23 @@ window.Quarto = {
 </div>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(df, df<span class="sc">$</span>random3 <span class="sc">&lt;=</span> <span class="fl">0.05</span>)[, <span class="fu">c</span>(<span class="st">"COUNTRY"</span>, <span class="st">"random3"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        COUNTRY     random3
-12      Bahamas 0.019428087
-84      Jamaica 0.032845780
-87   Kazakhstan 0.031846719
-108  Mauritania 0.046037958
-117  Mozambique 0.031087796
-142      Russia 0.006652389
-157 South Korea 0.015155739</code></pre>
+<pre><code>       COUNTRY    random3
+2      Albania 0.03977906
+7    Argentina 0.03077822
+44        Cuba 0.04860893
+48    Djibouti 0.01098008
+59        Fiji 0.04922525
+60     Finland 0.01211970
+77       India 0.04555468
+87  Kazakhstan 0.02977195
+119    Namibia 0.01470744</code></pre>
 </div>
 </div>
 <p>The <code>which()</code> function returns the row numbers that are being filtered.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(df<span class="sc">$</span>random3 <span class="sc">&lt;=</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1]  12  84  87 108 117 142 157</code></pre>
+<pre><code>[1]   2   7  44  48  59  60  77  87 119</code></pre>
 </div>
 </div>
 </section>
@@ -1149,23 +1151,23 @@ dbl (2): gdp, gini
 <div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">slice_sample</span>(tib1, <span class="at">n =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 4
-  country              gdp  gini region             
-  &lt;chr&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;              
-1 Dominican Republic  6660  45.3 South/Latin America
-2 Madagascar           470  42.7 Africa             
-3 Burkina Faso         727  35.5 Africa             
-4 Comoros             1350  45.5 Arab States        </code></pre>
+  country       gdp  gini region             
+  &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;              
+1 Japan       47100  32.1 Asia &amp; Pacific     
+2 Grenada      8190  40   South/Latin America
+3 Namibia      6270  59.5 Africa             
+4 South Sudan   731  45   Africa             </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">slice_sample</span>(tib1, <span class="at">prop =</span> <span class="fl">0.03</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 4
-  country   gdp  gini region             
-  &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;              
-1 Uruguay 13900  40.1 South/Latin America
-2 Brazil  11400  51.6 South/Latin America
-3 Qatar   65100  40   Middle east        
-4 Albania  4520  29   Europe             
-5 Belize   4300  53.3 South/Latin America</code></pre>
+  country       gdp  gini region             
+  &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;              
+1 Congo, Rep.  3010  48.9 Africa             
+2 Tonga        3900  37.5 Asia &amp; Pacific     
+3 Cape Verde   3410  47.2 Africa             
+4 Nepal         732  32.8 Asia &amp; Pacific     
+5 Grenada      8190  40   South/Latin America</code></pre>
 </div>
 </div>
 </section>
