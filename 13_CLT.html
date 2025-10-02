@@ -491,7 +491,7 @@ f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp{\left\{\frac{-(x - \mu)^2}{2 \sigma^
 </ol>
 <ol type="a">
 <li>Write a loop to call your function 1,000 times.</li>
-<li>[optional, hard!] Use an apply-like function (e.g., <code>sapply()</code> or <code>lapply()</code>) to call your function 1,000 times. You will need to use the <code>function(x)</code> approach from notes 03.</li>
+<li>[optional, hard!] Use an apply-like function (e.g., <code>sapply()</code> or <code>lapply()</code>) to call your function 1,000 times. You will need to use the <code>function(x)</code> approach.</li>
 </ol>
 <ol start="9" type="1">
 <li><p>You were able to call your function, but how are you saving the output? Save the output to a vector. You may need to define an empty vector of length 0 before your loop. You can use <code>vector(length = 0)</code>to do so.</p></li>
@@ -504,10 +504,24 @@ f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp{\left\{\frac{-(x - \mu)^2}{2 \sigma^
 </ol>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Base</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> SD_FROM_4, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot2 (remember the plus sign)</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stat_function</span>(<span class="at">fun =</span> dnorm, <span class="at">args =</span> <span class="fu">list</span>(<span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> SD_FROM_4))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(PUT_YOUR_TRANSFORMED_VECTOR_HERE, </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks =</span> <span class="dv">50</span>, </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"lightgreen"</span>, </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">probability =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Sampling Distribution of Transformed Means (n=10)"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fu">sqrt</span>(pop_variance)), </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">add =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">"red"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot2 (remember the plus sign)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>smtib <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(PUT_YOUR_TRANSFORMED_VECTOR_HERE)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(smtib) <span class="sc">+</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> value), <span class="at">stat =</span> <span class="st">"density"</span>) <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_function</span>(<span class="at">fun =</span> dnorm, <span class="at">args =</span> <span class="fu">list</span>(<span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fu">sqrt</span>(pop_variance)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="12" type="1">
 <li>Now you want to experiment with different sample sizes. Write a function that takes as arguments:</li>
@@ -521,7 +535,7 @@ f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp{\left\{\frac{-(x - \mu)^2}{2 \sigma^
 <p>The function should sample <code>n</code> observations from the population, calculate the sample mean, and save that sample mean to an element in a vector of size <code>num_samples</code>. The output of the function should be the vector of the transformed sample means <span class="math inline">\(\sqrt{n}(\bar{X}_n - \mu)\)</span>.</p>
 <ol start="13" type="1">
 <li><p>Run the function from 12 for <code>n = 2</code>, <code>n = 10</code>, <code>n = 50</code>, <code>n = 100</code>, and <code>n = 1000</code>. You should get 5 vectors from this. Save them to a data frame or a tibble. There should be 1,000 rows corresponding to the number of samples (<code>num_samples</code>). There should be 5 columns corresponding to each of the sample sizes.</p></li>
-<li><p>Plot the densities of each of the columns in 13. If you use <code>ggplot2</code> you may find it easier to reshape the data to be in long format. The function is <code>pivot_longer()</code>.</p></li>
+<li><p>Plot the densities of each of the columns in 13. You can use <code>hist()</code> with the option <code>add = TRUE</code>.</p></li>
 </ol>
 </section>
 <section id="activity-2-actual-data" class="level2" data-number="13.3">
@@ -532,7 +546,8 @@ f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp{\left\{\frac{-(x - \mu)^2}{2 \sigma^
 <li><p>Get key summary statistics for the variable <code>AmountWon</code>: mean, median, variance, minimum, and maximum.</p></li>
 <li><p>Plot a histogram or density of variable <code>AmountWon</code>. This is your population distribution.</p></li>
 <li><p>Test that the function you wrote for question 12 works for <code>n=10</code> with the population <code>AmountWon</code>.</p></li>
-<li><p>Repeat questions 13 and 14 for <code>AmountWon</code>.</p></li>
+<li><p>Repeat questions 13 and 14 for <code>AmountWon</code>. What do you notice about the distributions? Does the Central Limit Theorem seem to be working?</p></li>
+<li><p>Your answer to 20 should indicate that this is a special case. Create a variable that is the log of <code>AmountWon</code> and repeat questions 17-20 with that variable. Does the Central Limit Theorem work now?</p></li>
 </ol>
 </section>
 <section id="references" class="level2" data-number="13.4">
